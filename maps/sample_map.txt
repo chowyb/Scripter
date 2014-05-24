@@ -1,0 +1,9 @@
+(rows) (cols)
+
+// horizontal walls
+// 0 - no wall, 1 - wall
+(rows - 1) x (cols)
+
+// vertical walls
+// 0 - no wall, 1 - wall
+(rows) x (cols - 1)
