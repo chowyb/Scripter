@@ -1,4 +1,5 @@
-(rows) (cols)
+(rows)
+(cols)
 
 // horizontal walls
 // 0 - no wall, 1 - wall

@@ -1,9 +1,9 @@
 /** draw.js **/
 
  
-window.addEventListener("DOMContentLoaded", init, false); 
 function init() {
-    loadAndDrawImage("http://www.comp.nus.edu.sg/images/mySoC.png", 0, 0);
+	var currMap = LoadMap("02");
+	currMap.drawMap(0, 0);
     var canvas = document.getElementById("canvas");
     canvas.addEventListener("mousedown", getPosition, false);
 }
@@ -44,5 +44,5 @@ function getPosition(event) {
     y -= canvas.offsetTop;
 	
 	
-	loadAndDrawImage("http://www.comp.nus.edu.sg/images/socLink.png", x, y);
+	loadAndDrawImage("images/0015.png", Math.floor(x / 50) * 50, Math.floor(y / 50) * 50);
 }
