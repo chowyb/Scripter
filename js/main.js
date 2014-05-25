@@ -1,8 +1,12 @@
 window.addEventListener("DOMContentLoaded", init, false); 
+
+var character;
+var currMap;
+var turn = 1;
 function init() {
-	var currMap = LoadMap("02");
+	currMap = LoadMap("03");
 	currMap.drawMap(0, 0);
-	var character = new GameCharacter(0, 0, 4, currMap);
+	character = new GameCharacter(0, 0, 4, currMap);
 	character.initActionPointsMap(currMap);
 	character.drawCurrPos();
 	character.toMove(currMap);
@@ -46,7 +50,9 @@ function getPosition(event) {
     y -= canvas.offsetTop;
 	
 	
-	loadAndDrawImage("images/0015.png", Math.floor(x / 50) * 50, Math.floor(y / 50) * 50);
+	
+	character.move(Math.floor(y / 50), Math.floor(x / 50));
+	character.toMove(currMap);
 }
 
 function HoriWall(rows, cols) {
@@ -174,25 +180,60 @@ function GameCharacter (row, col, maxAP, map) {
 	}
 	
 	this.toMove = function(map) {
+		if (this.currAP === 0) {
+			this.currAP = 4;
+			turn++;
+		}
+		this.initActionPointsMap(map);
 		this.getActionPointsMap(map);
 		var canvas = document.getElementById("canvas");
 		var context = canvas.getContext("2d");
 		for (var i = 0; i < map.map.length; i++) {
 			for (var j = 0; j < map.map[0].length; j++) {
 				if (this.actionPointsMap[i][j] >= 0) {
-					context.clearRect(j * 50, i * 50, 50, 50);
-					var tileNo = map.map[i][j].toString();
-					while (tileNo.length < 4) {
-						tileNo = "0" + tileNo;
+					var tileNo = map.map[i][j] + 16;
+					var tileStr = tileNo.toString();
+					while (tileStr.length < 4) {
+						tileStr = "0" + tileStr;
 					}
-					loadAndDrawImage("images/" + tileNo + ".png", j * 50, i * 50);
-					if (this.actionPointsMap[i][j] === this.currAP) {
-						this.drawCurrPos();
+					context.clearRect(j * 50, i * 50, 50, 50);
+					loadAndDrawImage("images/" + tileStr + ".png", j * 50, i * 50);
+					if (i === this.row && j === this.col) {
+						loadAndDrawImage("images/chargreen.png", j * 50 + 10, i * 50 + 10)
 					}
 				}
 			}
 		}
-				
+		context.clearRect(0, 600, canvas.width, canvas.height);
+        context.font = '18pt Calibri';
+        context.fillStyle = 'black';
+        context.fillText("AP: " + this.currAP + ", Turn: " + turn, 0, 700);
+	};
+	
+	this.move = function(row, col) {
+		if (this.actionPointsMap[row][col] >= 0) {
+			this.row = row;
+			this.col = col;
+			this.currAP = this.actionPointsMap[row][col];
+			var canvas = document.getElementById("canvas");
+			var context = canvas.getContext("2d");
+			for (var i = 0; i < currMap.map.length; i++) {
+				for (var j = 0; j < currMap.map[0].length; j++) {
+					if (this.actionPointsMap[i][j] >= 0) {
+						var tileNo = currMap.map[i][j];
+						var tileStr = tileNo.toString();
+						while (tileStr.length < 4) {
+							tileStr = "0" + tileStr;
+						}
+						context.clearRect(j * 50, i * 50, 50, 50);
+						loadAndDrawImage("images/" + tileStr + ".png", j * 50, i * 50);
+						if (i === row && j === col) {
+							loadAndDrawImage("images/char.png", j * 50 + 10, i * 50 + 10)
+						}
+					}
+				}
+			}
+		}
 	};
 	
 	this.initActionPointsMap = function(map) {
@@ -217,6 +258,9 @@ function GameCharacter (row, col, maxAP, map) {
 			toContinue = false;
 		}
 		else if (row >= map.map.length || col >= map.map[0].length || row < 0 || col < 0) {
+			toContinue = false;
+		}
+		else if (actionPoints <= actionPointsMap[row][col]) {
 			toContinue = false;
 		}
 		if (toContinue) {
