@@ -4,7 +4,8 @@ var character;
 var currMap;
 var turn = 1;
 function init() {
-	currMap = LoadMap("03");
+	var mapNo = 3 + Math.floor(Math.random() * 4);
+	currMap = LoadMap("0" + mapNo.toString());
 	currMap.drawMap(0, 0);
 	character = new GameCharacter(0, 0, 4, currMap);
 	character.initActionPointsMap(currMap);
