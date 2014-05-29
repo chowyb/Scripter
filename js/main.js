@@ -72,6 +72,9 @@ function getPosition(event) {
 		if (currChar.currAP <= 0 || currChar.actionPointsMap[rowMove][colMove] < 0) {
 			currChar.move(currChar.row, currChar.col);
 			currChar = null;
+			for (i = 0; i < character.length; i++) {
+				loadAndDrawImage(character[i].imagePath, character[i].col * 50 + 10, character[i].row * 50 + 10);
+			}
 		}
 		else {
 			currChar.toMove(currMap);
