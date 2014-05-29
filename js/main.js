@@ -1,16 +1,20 @@
 window.addEventListener("DOMContentLoaded", init, false); 
 
-var character;
+var character = new Array();
+var currChar;
 var currMap;
 var turn = 1;
 function init() {
 	var mapNo = 3 + Math.floor(Math.random() * 4);
 	currMap = LoadMap("0" + mapNo.toString());
 	currMap.drawMap(0, 0);
-	character = new GameCharacter(0, 0, 4, currMap);
-	character.initActionPointsMap(currMap);
-	character.drawCurrPos();
-	character.toMove(currMap);
+	character[0] = new GameCharacter(0, 0, 4, 1, currMap);
+	character[1] = new GameCharacter(9, 14, 4, 2, currMap);
+	for (var i = 0; i < character.length; i++) {
+		character[i].initActionPointsMap(currMap);
+		character[i].getActionPointsMap(currMap);
+		character[i].drawCurrPos();
+	}
     var canvas = document.getElementById("canvas");
     canvas.addEventListener("mousedown", getPosition, false);
 }
@@ -50,10 +54,54 @@ function getPosition(event) {
     x -= canvas.offsetLeft;
     y -= canvas.offsetTop;
 	
-	
-	
-	character.move(Math.floor(y / 50), Math.floor(x / 50));
-	character.toMove(currMap);
+	var i;
+	if (currChar == null) {
+		var row = Math.floor(y / 50);
+		var col = Math.floor(x / 50);
+		for (i = 0; i < character.length; i++) {
+			if (character[i].row === row && character[i].col === col && character[i].currAP > 0) {
+				currChar = character[i];
+			}
+		}
+	}
+	if (currChar != null) {
+		var rowMove = Math.floor(y / 50);
+		var colMove = Math.floor(x / 50);
+		currChar.move(rowMove, colMove);
+		updateStatus();
+		if (currChar.currAP <= 0 || currChar.actionPointsMap[rowMove][colMove] < 0) {
+			currChar.move(currChar.row, currChar.col);
+			currChar = null;
+		}
+		else {
+			currChar.toMove(currMap);
+		}
+	}
+	var toRefresh = true;
+	for (i = 0; i < character.length; i++) {
+		if (character[i].currAP > 0) {
+			toRefresh = false;
+		}
+	}
+	//window.alert(toRefresh + " " + character[0].currAP.toString() + " " + character[1].currAP.toString() + " " + turn);
+	if (toRefresh) {
+		for (i = 0; i < character.length; i++) {
+			character[i].currAP = 4;
+			character[i].initActionPointsMap(currMap);
+			character[i].getActionPointsMap(currMap);
+		}
+		turn++;
+	}
+		
+}
+
+function updateStatus() {
+	var canvas = document.getElementById("canvas");
+	var context = canvas.getContext("2d");
+	context.clearRect(0, 600, canvas.width, canvas.height);
+	context.font = '18pt Calibri';
+	context.fillStyle = 'black';
+	context.fillText("AP: " + currChar.currAP + ", Turn: " + turn + ", ID: " + currChar.id.toString(), 0, 700);
 }
 
 function HoriWall(rows, cols) {
@@ -170,21 +218,18 @@ function LoadMap(mapNo) {
 	return map;
 }
 
-function GameCharacter (row, col, maxAP, map) {
+function GameCharacter (row, col, maxAP, id, map) {
 	this.row = row;
 	this.col = col;
 	this.currAP = maxAP;
-	this.imagePath = "images/char.png";
+	this.id = id;
+	this.imagePath = "images/char" + id.toString() + ".png";
 	this.actionPointsMap = new Array();
 	for (var i = 0; i < map.map.length; i++) {
 		this.actionPointsMap[i] = new Array();
 	}
 	
 	this.toMove = function(map) {
-		if (this.currAP === 0) {
-			this.currAP = 4;
-			turn++;
-		}
 		this.initActionPointsMap(map);
 		this.getActionPointsMap(map);
 		var canvas = document.getElementById("canvas");
@@ -200,15 +245,11 @@ function GameCharacter (row, col, maxAP, map) {
 					context.clearRect(j * 50, i * 50, 50, 50);
 					loadAndDrawImage("images/" + tileStr + ".png", j * 50, i * 50);
 					if (i === this.row && j === this.col) {
-						loadAndDrawImage("images/chargreen.png", j * 50 + 10, i * 50 + 10)
+						loadAndDrawImage("images/chargreen" + id.toString() + ".png", j * 50 + 10, i * 50 + 10)
 					}
 				}
 			}
 		}
-		context.clearRect(0, 600, canvas.width, canvas.height);
-        context.font = '18pt Calibri';
-        context.fillStyle = 'black';
-        context.fillText("AP: " + this.currAP + ", Turn: " + turn, 0, 700);
 	};
 	
 	this.move = function(row, col) {
@@ -229,7 +270,7 @@ function GameCharacter (row, col, maxAP, map) {
 						context.clearRect(j * 50, i * 50, 50, 50);
 						loadAndDrawImage("images/" + tileStr + ".png", j * 50, i * 50);
 						if (i === row && j === col) {
-							loadAndDrawImage("images/char.png", j * 50 + 10, i * 50 + 10)
+							loadAndDrawImage(this.imagePath, j * 50 + 10, i * 50 + 10)
 						}
 					}
 				}
