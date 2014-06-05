@@ -7,7 +7,8 @@ var turn;
 
 function init() {}
 function loadAndDrawImage(url, x, y) {}
-function getPosition(event) {}
+function getPositionClick(event) {}
+function getPositionMove(event) {}
 function updateStatus() {}
 
 function HoriWall(rows, cols) {

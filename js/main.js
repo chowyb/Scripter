@@ -18,6 +18,7 @@ function init() {
     var canvas = document.getElementById("canvas");
     canvas.addEventListener("mousedown", getPositionClick, false);
     canvas.addEventListener("mousemove", getPositionMove, false);
+	updateTurn();
 }
 
 function loadAndDrawImage(url, x, y)
@@ -95,6 +96,7 @@ function getPositionClick(event) {
 			character[i].getActionPointsMap(currMap);
 		}
 		turn++;
+		updateTurn();
 	}
 		
 }
@@ -129,7 +131,7 @@ function getPositionMove(event) {
 	}
 	var canvas = document.getElementById("canvas");
 	var context = canvas.getContext("2d");
-	context.clearRect(0, 610, canvas.width, 200);
+	context.clearRect(0, 610, 350, 200);
 	context.font = '18pt Calibri';
 	context.fillStyle = 'black';
 	context.fillText("Mouseover coordinates:", 0, 630);
@@ -143,12 +145,23 @@ function getPositionMove(event) {
 function updateStatus() {
 	var canvas = document.getElementById("canvas");
 	var context = canvas.getContext("2d");
-	context.clearRect(0, 510, canvas.width, 100);
+	context.clearRect(0, 510, 350, 100);
 	context.font = '18pt Calibri';
 	context.fillStyle = 'black';
-	context.fillText("Current selection:", 0, 530);
-	context.fillText("AP: " + currChar.currAP + ", Turn: " + turn + ", ID: " + currChar.id.toString(), 0, 560);
+	context.fillText("Current selection: Character", 0, 530);
+	context.fillText("AP: " + currChar.currAP + ", ID: " + currChar.id.toString(), 0, 560);
 }
+
+function updateTurn() {
+	var canvas = document.getElementById("canvas");
+	var context = canvas.getContext("2d");
+	context.clearRect(400, 510, 350, 100);
+	context.font = '18pt Calibri';
+	context.fillStyle = 'black';
+	context.fillText("Turn: " + turn, 400, 530);
+	
+}
+
 
 function HoriWall(rows, cols) {
 	this.wallArr = new Array();
