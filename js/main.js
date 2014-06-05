@@ -16,7 +16,8 @@ function init() {
 		character[i].drawCurrPos();
 	}
     var canvas = document.getElementById("canvas");
-    canvas.addEventListener("mousedown", getPosition, false);
+    canvas.addEventListener("mousedown", getPositionClick, false);
+    canvas.addEventListener("mousemove", getPositionMove, false);
 }
 
 function loadAndDrawImage(url, x, y)
@@ -35,7 +36,7 @@ function loadAndDrawImage(url, x, y)
     image.src = url;
 }
 
-function getPosition(event) {
+function getPositionClick(event) {
     var x = new Number();
     var y = new Number();
     var canvas = document.getElementById("canvas");
@@ -98,13 +99,55 @@ function getPosition(event) {
 		
 }
 
+function getPositionMove(event) {
+    var x = new Number();
+    var y = new Number();
+    var canvas = document.getElementById("canvas");
+
+    if (event.x != undefined && event.y != undefined) {
+        x = event.x;
+        y = event.y;
+    }
+    else { // Firefox method to get the position
+        x = event.clientX + document.body.scrollLeft +
+            document.documentElement.scrollLeft;
+        y = event.clientY + document.body.scrollTop +
+            document.documentElement.scrollTop;
+    }
+
+    x -= canvas.offsetLeft;
+    y -= canvas.offsetTop;
+	
+	var row = Math.floor(y / 50);
+	var col = Math.floor(x / 50);
+	var i;
+	var mouseChar;
+	for (i = 0; i < character.length; i++) {
+		if (character[i].row === row && character[i].col === col) {
+			mouseChar = character[i];
+		}
+	}
+	var canvas = document.getElementById("canvas");
+	var context = canvas.getContext("2d");
+	context.clearRect(0, 610, canvas.width, 200);
+	context.font = '18pt Calibri';
+	context.fillStyle = 'black';
+	context.fillText("Mouseover coordinates:", 0, 630);
+	context.fillText(x + " " + y, 0, 660);
+	if (mouseChar != null) {
+		context.fillText("Mouseover element: Character", 0, 710);
+		context.fillText("AP: " + mouseChar.currAP + ", ID: " + mouseChar.id.toString(), 0, 740);
+	}
+}
+
 function updateStatus() {
 	var canvas = document.getElementById("canvas");
 	var context = canvas.getContext("2d");
-	context.clearRect(0, 600, canvas.width, canvas.height);
+	context.clearRect(0, 510, canvas.width, 100);
 	context.font = '18pt Calibri';
 	context.fillStyle = 'black';
-	context.fillText("AP: " + currChar.currAP + ", Turn: " + turn + ", ID: " + currChar.id.toString(), 0, 700);
+	context.fillText("Current selection:", 0, 530);
+	context.fillText("AP: " + currChar.currAP + ", Turn: " + turn + ", ID: " + currChar.id.toString(), 0, 560);
 }
 
 function HoriWall(rows, cols) {
@@ -325,4 +368,9 @@ function GameCharacter (row, col, maxAP, id, map) {
 			}
 		}
 	};
+}
+
+function ControlPoint (row, col) {
+	this.row = row;
+	this.col = col;
 }
