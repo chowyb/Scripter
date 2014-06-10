@@ -1,6 +1,6 @@
-// This file contains function headers and variables for ease of reading
+// This file contains function headers and variables (if part of a class) for ease of reading
 
-var character;
+var character = [];
 var currChar;
 var currMap;
 var turn;
@@ -10,6 +10,7 @@ function loadAndDrawImage(url, x, y) {}
 function getPositionClick(event) {}
 function getPositionMove(event) {}
 function updateStatus() {}
+function updateTurn() {}
 
 function HoriWall(rows, cols) {
 	this.wallArr = [[]];

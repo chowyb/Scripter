@@ -303,10 +303,15 @@ function GameCharacter (row, col, maxAP, id, map) {
 					}
 					context.clearRect(j * 50, i * 50, 50, 50);
 					loadAndDrawImage("images/" + tileStr + ".png", j * 50, i * 50);
-					if (i === this.row && j === this.col) {
+					/*if (i === this.row && j === this.col) {
 						loadAndDrawImage("images/chargreen" + id.toString() + ".png", j * 50 + 10, i * 50 + 10)
-					}
+					}*/
 				}
+			}
+		}
+		for (var i = 0; i < character.length; i++) {
+			if (this.actionPointsMap[character[i].row][character[i].col] >= 0) {
+				loadAndDrawImage("images/chargreen" + character[i].id.toString() + ".png", character[i].col * 50 + 10, character[i].row * 50 + 10);
 			}
 		}
 	};
