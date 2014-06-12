@@ -1,6 +1,11 @@
 window.addEventListener("DOMContentLoaded", init, false); 
 
-var character = new Array();
+var teams = new Array();
+for (var i = 0; i < 2; i++) {
+	teams[i] = new Array();
+}
+var character = teams[0];
+var teamToMove = 0;
 var currChar;
 var currMap;
 var turn = 1;
@@ -8,12 +13,16 @@ function init() {
 	var mapNo = 3 + Math.floor(Math.random() * 4);
 	currMap = LoadMap("0" + mapNo.toString());
 	currMap.drawMap(0, 0);
-	character[0] = new GameCharacter(0, 0, 4, 1, currMap);
-	character[1] = new GameCharacter(9, 14, 4, 2, currMap);
-	for (var i = 0; i < character.length; i++) {
-		character[i].initActionPointsMap(currMap);
-		character[i].getActionPointsMap(currMap);
-		character[i].drawCurrPos();
+	teams[0][0] = new GameCharacter(0, 0, 4, 1, currMap);
+	teams[0][1] = new GameCharacter(9, 14, 4, 2, currMap);
+	teams[1][0] = new GameCharacter(9, 0, 4, 6, currMap);
+	teams[1][1] = new GameCharacter(0, 14, 4, 7, currMap);
+	for (var i = 0; i < teams.length; i++) {
+		for (var j = 0; j < teams[i].length; j++) {
+			teams[i][j].initActionPointsMap(currMap);
+			teams[i][j].getActionPointsMap(currMap);
+			teams[i][j].drawCurrPos();
+		}
 	}
     var canvas = document.getElementById("canvas");
     canvas.addEventListener("mousedown", getPositionClick, false);
@@ -57,6 +66,7 @@ function getPositionClick(event) {
     y -= canvas.offsetTop;
 	
 	var i;
+	var j;
 	if (currChar == null) {
 		var row = Math.floor(y / 50);
 		var col = Math.floor(x / 50);
@@ -70,12 +80,19 @@ function getPositionClick(event) {
 		var rowMove = Math.floor(y / 50);
 		var colMove = Math.floor(x / 50);
 		currChar.move(rowMove, colMove);
+		for (i = 0; i < teams.length; i++) {
+			for (j = 0; j < teams[i].length; j++) {
+				loadAndDrawImage(teams[i][j].imagePath, teams[i][j].col * 50 + 10, teams[i][j].row * 50 + 10);
+			}
+		}
 		updateStatus();
 		if (currChar.currAP <= 0 || currChar.actionPointsMap[rowMove][colMove] < 0) {
 			currChar.move(currChar.row, currChar.col);
 			currChar = null;
-			for (i = 0; i < character.length; i++) {
-				loadAndDrawImage(character[i].imagePath, character[i].col * 50 + 10, character[i].row * 50 + 10);
+			for (i = 0; i < teams.length; i++) {
+				for (j = 0; j < teams[i].length; j++) {
+					loadAndDrawImage(teams[i][j].imagePath, teams[i][j].col * 50 + 10, teams[i][j].row * 50 + 10);
+				}
 			}
 		}
 		else {
@@ -90,12 +107,17 @@ function getPositionClick(event) {
 	}
 	//window.alert(toRefresh + " " + character[0].currAP.toString() + " " + character[1].currAP.toString() + " " + turn);
 	if (toRefresh) {
+		teamToMove++;
+		if (teamToMove >= teams.length) {
+			teamToMove = 0;
+			turn++;
+		}
+		character = teams[teamToMove];
 		for (i = 0; i < character.length; i++) {
 			character[i].currAP = 4;
 			character[i].initActionPointsMap(currMap);
 			character[i].getActionPointsMap(currMap);
 		}
-		turn++;
 		updateTurn();
 	}
 		
@@ -123,29 +145,30 @@ function getPositionMove(event) {
 	var row = Math.floor(y / 50);
 	var col = Math.floor(x / 50);
 	var i;
+	var j;
 	var mouseChar;
-	for (i = 0; i < character.length; i++) {
-		if (character[i].row === row && character[i].col === col) {
-			mouseChar = character[i];
+	for (i = 0; i < teams.length; i++) {
+		for (j = 0; j < teams[i].length; j++) {
+			if (teams[i][j].row === row && teams[i][j].col === col) {
+				mouseChar = teams[i][j];
+			}
 		}
 	}
 	var canvas = document.getElementById("canvas");
 	var context = canvas.getContext("2d");
-	context.clearRect(0, 610, 350, 200);
+	context.clearRect(0, 590, 350, 80);
 	context.font = '18pt Calibri';
 	context.fillStyle = 'black';
-	context.fillText("Mouseover coordinates:", 0, 630);
-	context.fillText(x + " " + y, 0, 660);
 	if (mouseChar != null) {
-		context.fillText("Mouseover element: Character", 0, 710);
-		context.fillText("AP: " + mouseChar.currAP + ", ID: " + mouseChar.id.toString(), 0, 740);
+		context.fillText("Mouseover element: Character", 0, 610);
+		context.fillText("AP: " + mouseChar.currAP + ", ID: " + mouseChar.id.toString(), 0, 640);
 	}
 }
 
 function updateStatus() {
 	var canvas = document.getElementById("canvas");
 	var context = canvas.getContext("2d");
-	context.clearRect(0, 510, 350, 100);
+	context.clearRect(0, 510, 350, 80);
 	context.font = '18pt Calibri';
 	context.fillStyle = 'black';
 	context.fillText("Current selection: Character", 0, 530);
@@ -155,11 +178,20 @@ function updateStatus() {
 function updateTurn() {
 	var canvas = document.getElementById("canvas");
 	var context = canvas.getContext("2d");
-	context.clearRect(400, 510, 350, 100);
+	context.clearRect(400, 510, 350, 80);
 	context.font = '18pt Calibri';
 	context.fillStyle = 'black';
 	context.fillText("Turn: " + turn, 400, 530);
-	
+	var teamColour;
+	switch (teamToMove) {
+		case 0:
+			teamColour = "Red";
+			break;
+		case 1:
+			teamColour = "Blue";
+			break;
+	}
+	context.fillText(teamColour + " to move", 400, 560);
 }
 
 
@@ -309,9 +341,11 @@ function GameCharacter (row, col, maxAP, id, map) {
 				}
 			}
 		}
-		for (var i = 0; i < character.length; i++) {
-			if (this.actionPointsMap[character[i].row][character[i].col] >= 0) {
-				loadAndDrawImage("images/chargreen" + character[i].id.toString() + ".png", character[i].col * 50 + 10, character[i].row * 50 + 10);
+		for (var i = 0; i < teams.length; i++) {
+			for (var j = 0; j < teams[i].length; j++) {
+				if (this.actionPointsMap[teams[i][j].row][teams[i][j].col] >= 0) {
+					loadAndDrawImage("images/chargreen" + teams[i][j].id.toString() + ".png", teams[i][j].col * 50 + 10, teams[i][j].row * 50 + 10);
+				}
 			}
 		}
 	};
@@ -391,4 +425,6 @@ function GameCharacter (row, col, maxAP, id, map) {
 function ControlPoint (row, col) {
 	this.row = row;
 	this.col = col;
+	this.owner = 0;
+	this.keys = new Array();
 }

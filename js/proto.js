@@ -1,6 +1,8 @@
 // This file contains function headers and variables (if part of a class) for ease of reading
 
-var character = [];
+var teams = [[]];
+var character = teams[0];
+var teamToMove;
 var currChar;
 var currMap;
 var turn;
