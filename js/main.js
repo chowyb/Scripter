@@ -335,9 +335,6 @@ function GameCharacter (row, col, maxAP, id, map) {
 					}
 					context.clearRect(j * 50, i * 50, 50, 50);
 					loadAndDrawImage("images/" + tileStr + ".png", j * 50, i * 50);
-					/*if (i === this.row && j === this.col) {
-						loadAndDrawImage("images/chargreen" + id.toString() + ".png", j * 50 + 10, i * 50 + 10)
-					}*/
 				}
 			}
 		}
