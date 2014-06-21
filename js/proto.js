@@ -33,7 +33,7 @@ function GameMap(rows, cols) {
 
 function LoadMap(mapNo) {}
 
-function GameCharacter (row, col, maxAP, id, map) {
+function GameCharacter(row, col, maxAP, id, map) {
 	this.row = row;
 	this.col = col;
 	this.currAP = maxAP;
@@ -46,4 +46,17 @@ function GameCharacter (row, col, maxAP, id, map) {
 	this.drawCurrPos = function() {};
 	this.getActionPointsMap = function(map) {};
 	this.actionPointsMapRecur = function(row, col, actionPoints, actionPointsMap, map) {};
+}
+
+function ControlPoint(row, col) {
+	this.row = row;
+	this.col = col;
+	this.owner = -1;
+	this.keys = new Array();
+}
+
+function Key(level) {
+	this.level = level;
+	this.countdown;
+	this.turnUpdate = function() {};
 }

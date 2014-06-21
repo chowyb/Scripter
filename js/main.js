@@ -419,9 +419,26 @@ function GameCharacter (row, col, maxAP, id, map) {
 	};
 }
 
-function ControlPoint (row, col) {
+function ControlPoint(row, col) {
 	this.row = row;
 	this.col = col;
-	this.owner = 0;
+	this.owner = -1;
 	this.keys = new Array();
+}
+
+function Key(level) {
+	this.level = level;
+	this.countdown;
+	
+	this.turnUpdate = function() {
+		countdown--;
+		if (countdown <= 0) {
+			level++;
+			countdown = level;
+		}
+	};
+	
+	this.delevel = function() {
+		level--;
+	};
 }
