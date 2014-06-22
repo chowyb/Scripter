@@ -423,22 +423,61 @@ function ControlPoint(row, col) {
 	this.row = row;
 	this.col = col;
 	this.owner = -1;
-	this.keys = new Array();
+	// [range, AP, shield]
+	this.keys = [0, 0, 0];
+	this.rangeMap = new Array();
+	for (var i = 0; i < currMap.map.length; i++) {
+		this.rangeMap[i] = new Array();
+	}
+	this.resetRangeMap();
+	
+	this.resetRangeMap = function() {
+		for (var i = 0; i < currMap.map.length; i++) {
+			for (var j = 0; j < currMap.map[i].length; j++) {
+				this.rangeMap[i][j] = false;
+			}
+		}
+	};
+	
+	this.setRangeMap = function() {
+		for (var i = 0; i < this.rangeMap.length; i++) {
+			for (var j = 0; j < this.rangeMap[i].length; j++) {
+				if (Math.abs(i - this.col) + Math.abs(j - this.row) <= (this.keys[i].level - 1) / 2) {
+					this.rangeMap[i][j] = true;
+				}
+			}
+		}
+	};
+		
+	
+	this.addKey = function(index) {
+		this.keys[index] = new Key(1);
+	};
+	
+	this.lowerKey = function(index) {
+		this.keys[index].delevel;
+		if (this.keys[index].level <= 0) {
+			this.keys[index].level = 0;
+		}
+	};
 }
 
 function Key(level) {
 	this.level = level;
 	this.countdown;
 	
-	this.turnUpdate = function() {
-		countdown--;
-		if (countdown <= 0) {
-			level++;
-			countdown = level;
+	this.turnUpdate = function(power) {
+		if (this.level > 0) {
+			this.countdown -= power;
+			while (countdown <= 0) {
+				this.countdown += this.level;
+				this.level++;
+			}
 		}
 	};
 	
 	this.delevel = function() {
-		level--;
+		this.level--;
+		this.countdown = this.level;
 	};
 }
