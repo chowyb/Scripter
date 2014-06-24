@@ -8,6 +8,8 @@ var character = teams[0];
 var teamToMove = 0;
 var currChar;
 var currMap;
+var mouseRow = -1;
+var mouseCol = -1;
 var turn = 1;
 function init() {
 	var mapNo = 3 + Math.floor(Math.random() * 4);
@@ -105,7 +107,6 @@ function getPositionClick(event) {
 			toRefresh = false;
 		}
 	}
-	//window.alert(toRefresh + " " + character[0].currAP.toString() + " " + character[1].currAP.toString() + " " + turn);
 	if (toRefresh) {
 		teamToMove++;
 		if (teamToMove >= teams.length) {
@@ -144,24 +145,30 @@ function getPositionMove(event) {
 	
 	var row = Math.floor(y / 50);
 	var col = Math.floor(x / 50);
-	var i;
-	var j;
-	var mouseChar;
-	for (i = 0; i < teams.length; i++) {
-		for (j = 0; j < teams[i].length; j++) {
-			if (teams[i][j].row === row && teams[i][j].col === col) {
-				mouseChar = teams[i][j];
+	if (row != mouseRow || col != mouseCol) {
+		mouseRow = row;
+		mouseCol = col;
+		var i;
+		var j;
+		var k = 0;
+		var mouseChar = new Array();
+		for (i = 0; i < teams.length; i++) {
+			for (j = 0; j < teams[i].length; j++) {
+				if (teams[i][j].row === row && teams[i][j].col === col) {
+					mouseChar[k++] = teams[i][j];
+				}
 			}
 		}
-	}
-	var canvas = document.getElementById("canvas");
-	var context = canvas.getContext("2d");
-	context.clearRect(0, 590, 350, 80);
-	context.font = '18pt Calibri';
-	context.fillStyle = 'black';
-	if (mouseChar != null) {
-		context.fillText("Mouseover element: Character", 0, 610);
-		context.fillText("AP: " + mouseChar.currAP + ", ID: " + mouseChar.id.toString(), 0, 640);
+		var canvas = document.getElementById("canvas");
+		var context = canvas.getContext("2d");
+		context.clearRect(0, 590, 350, 80);
+		context.font = '10pt Calibri';
+		context.fillStyle = 'black';
+		for(i = 0; i < k; i++) {
+			loadAndDrawImage(mouseChar[i].imagePath, i * 50, 610)
+			context.fillText("AP: " + mouseChar[i].currAP, i * 50, 655);
+			context.fillText("Lvl: " + mouseChar[i].level, i * 50, 670);
+		}
 	}
 }
 
@@ -314,11 +321,23 @@ function GameCharacter (row, col, maxAP, id, map) {
 	this.col = col;
 	this.currAP = maxAP;
 	this.id = id;
+	this.level = 1;
+	this.exp = 0;
+	this.nextExp = 10;
 	this.imagePath = "images/char" + id.toString() + ".png";
 	this.actionPointsMap = new Array();
 	for (var i = 0; i < map.map.length; i++) {
 		this.actionPointsMap[i] = new Array();
 	}
+	
+	this.gainExp = function(addedExp) {
+		this.exp += addedExp;
+		while (this.exp >= this.nextExp) {
+			this.exp -= this.nextExp;
+			this.level++;
+			this.nextExp = level * 10;
+		}
+	};
 	
 	this.toMove = function(map) {
 		this.initActionPointsMap(map);
@@ -454,6 +473,10 @@ function ControlPoint(row, col) {
 		this.keys[index] = new Key(1);
 	};
 	
+	this.raiseKey = function(index, power) {
+		this.keys[index].turnUpdate(power);
+	};
+	
 	this.lowerKey = function(index) {
 		this.keys[index].delevel;
 		if (this.keys[index].level <= 0) {
@@ -466,7 +489,7 @@ function Key(level) {
 	this.level = level;
 	this.countdown;
 	
-	this.turnUpdate = function(power) {
+	this.raise = function(power) {
 		if (this.level > 0) {
 			this.countdown -= power;
 			while (countdown <= 0) {

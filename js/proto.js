@@ -26,6 +26,7 @@ function GameMap(rows, cols) {
 	this.horiArr = new HoriWall(rows, cols);
 	this.vertArr = new VertWall(rows, cols);
 	this.map = [[]];
+	
 	this.setHori = function(row, col, value) {};
 	this.setVert = function(row, col, value) {};
 	this.drawMap = function(x, y) {};
@@ -38,8 +39,13 @@ function GameCharacter(row, col, maxAP, id, map) {
 	this.col = col;
 	this.currAP = maxAP;
 	this.id = id;
+	this.level = 1;
+	this.exp = 0;
+	this.nextExp = 10;
 	this.imagePath = "images/char" + id.toString() + ".png";
 	this.actionPointsMap = [[]];
+	
+	this.gainExp = function(addedExp) {};
 	this.toMove = function(map) {};
 	this.move = function(row, col) {}:
 	this.initActionPointsMap = function(map) {};
@@ -53,10 +59,20 @@ function ControlPoint(row, col) {
 	this.col = col;
 	this.owner = -1;
 	this.keys = new Array();
+	this.rangeMap = new Array();
+	
+	this.resetRangeMap = function() {};
+	this.setRangeMap = function() {};
+	this.addKey = function(index) {};
+	this.raiseKey = function(index, power) {};
+	this.lowerKey = function(index) {};
+	
 }
 
 function Key(level) {
 	this.level = level;
 	this.countdown;
-	this.turnUpdate = function() {};
+	
+	this.raise = function(power) {};
+	this.delevel = function() {};
 }
