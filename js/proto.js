@@ -11,6 +11,7 @@ function init() {}
 function loadAndDrawImage(url, x, y) {}
 function getPositionClick(event) {}
 function getPositionMove(event) {}
+function mouseOverPrint(row, col) {}
 function updateStatus() {}
 function updateTurn() {}
 

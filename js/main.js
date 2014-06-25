@@ -15,10 +15,10 @@ function init() {
 	var mapNo = 3 + Math.floor(Math.random() * 4);
 	currMap = LoadMap("0" + mapNo.toString());
 	currMap.drawMap(0, 0);
-	teams[0][0] = new GameCharacter(0, 0, 4, 1, currMap);
-	teams[0][1] = new GameCharacter(9, 14, 4, 2, currMap);
-	teams[1][0] = new GameCharacter(9, 0, 4, 6, currMap);
-	teams[1][1] = new GameCharacter(0, 14, 4, 7, currMap);
+	teams[0][0] = new GameCharacter(0, 0, 5, 1, currMap);
+	teams[0][1] = new GameCharacter(9, 14, 5, 2, currMap);
+	teams[1][0] = new GameCharacter(9, 0, 0, 6, currMap);
+	teams[1][1] = new GameCharacter(0, 14, 0, 7, currMap);
 	for (var i = 0; i < teams.length; i++) {
 		for (var j = 0; j < teams[i].length; j++) {
 			teams[i][j].initActionPointsMap(currMap);
@@ -82,6 +82,7 @@ function getPositionClick(event) {
 		var rowMove = Math.floor(y / 50);
 		var colMove = Math.floor(x / 50);
 		currChar.move(rowMove, colMove);
+		mouseOverPrint(rowMove, colMove);
 		for (i = 0; i < teams.length; i++) {
 			for (j = 0; j < teams[i].length; j++) {
 				loadAndDrawImage(teams[i][j].imagePath, teams[i][j].col * 50 + 10, teams[i][j].row * 50 + 10);
@@ -115,7 +116,10 @@ function getPositionClick(event) {
 		}
 		character = teams[teamToMove];
 		for (i = 0; i < character.length; i++) {
-			character[i].currAP = 4;
+			character[i].currAP += (4 + Math.ceil(character[i].level / 5));
+			if (character[i].currAP > (5 + Math.ceil(character[i].level / 3))) {
+				character[i].currAP = 5 + (Math.ceil(character[i].level / 3));
+			}
 			character[i].initActionPointsMap(currMap);
 			character[i].getActionPointsMap(currMap);
 		}
@@ -146,29 +150,33 @@ function getPositionMove(event) {
 	var row = Math.floor(y / 50);
 	var col = Math.floor(x / 50);
 	if (row != mouseRow || col != mouseCol) {
-		mouseRow = row;
-		mouseCol = col;
-		var i;
-		var j;
-		var k = 0;
-		var mouseChar = new Array();
-		for (i = 0; i < teams.length; i++) {
-			for (j = 0; j < teams[i].length; j++) {
-				if (teams[i][j].row === row && teams[i][j].col === col) {
-					mouseChar[k++] = teams[i][j];
-				}
+		mouseOverPrint(row, col);
+	}
+}
+
+function mouseOverPrint(row, col) {
+	mouseRow = row;
+	mouseCol = col;
+	var i;
+	var j;
+	var k = 0;
+	var mouseChar = new Array();
+	for (i = 0; i < teams.length; i++) {
+		for (j = 0; j < teams[i].length; j++) {
+			if (teams[i][j].row === row && teams[i][j].col === col) {
+				mouseChar[k++] = teams[i][j];
 			}
 		}
-		var canvas = document.getElementById("canvas");
-		var context = canvas.getContext("2d");
-		context.clearRect(0, 590, 350, 80);
-		context.font = '10pt Calibri';
-		context.fillStyle = 'black';
-		for(i = 0; i < k; i++) {
-			loadAndDrawImage(mouseChar[i].imagePath, i * 50, 610)
-			context.fillText("AP: " + mouseChar[i].currAP, i * 50, 655);
-			context.fillText("Lvl: " + mouseChar[i].level, i * 50, 670);
-		}
+	}
+	var canvas = document.getElementById("canvas");
+	var context = canvas.getContext("2d");
+	context.clearRect(0, 590, 350, 80);
+	context.font = '10pt Calibri';
+	context.fillStyle = 'black';
+	for(i = 0; i < mouseChar.length; i++) {
+		loadAndDrawImage(mouseChar[i].imagePath, i * 50, 610)
+		context.fillText("AP: " + mouseChar[i].currAP, i * 50, 655);
+		context.fillText("Lvl: " + mouseChar[i].level, i * 50, 670);
 	}
 }
 
@@ -176,10 +184,12 @@ function updateStatus() {
 	var canvas = document.getElementById("canvas");
 	var context = canvas.getContext("2d");
 	context.clearRect(0, 510, 350, 80);
-	context.font = '18pt Calibri';
+	context.font = '12pt Calibri';
 	context.fillStyle = 'black';
-	context.fillText("Current selection: Character", 0, 530);
-	context.fillText("AP: " + currChar.currAP + ", ID: " + currChar.id.toString(), 0, 560);
+	loadAndDrawImage(currChar.imagePath, 0, 520);
+	context.fillText("AP: " + currChar.currAP, 40, 530);
+	context.fillText("Lvl: " + currChar.level, 40, 550);
+	context.fillText("Exp: " + currChar.exp + "/" + currChar.nextExp, 100, 530);
 }
 
 function updateTurn() {
