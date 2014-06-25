@@ -4,8 +4,8 @@ var teams = new Array();
 for (var i = 0; i < 2; i++) {
 	teams[i] = new Array();
 }
-var character = teams[0];
-var teamToMove = 0;
+var character;
+var teamToMove = -1;
 var currChar;
 var currMap;
 var mouseRow = -1;
@@ -15,8 +15,8 @@ function init() {
 	var mapNo = 3 + Math.floor(Math.random() * 4);
 	currMap = LoadMap("0" + mapNo.toString());
 	currMap.drawMap(0, 0);
-	teams[0][0] = new GameCharacter(0, 0, 5, 1, currMap);
-	teams[0][1] = new GameCharacter(9, 14, 5, 2, currMap);
+	teams[0][0] = new GameCharacter(0, 0, 0, 1, currMap);
+	teams[0][1] = new GameCharacter(9, 14, 0, 2, currMap);
 	teams[1][0] = new GameCharacter(9, 0, 0, 6, currMap);
 	teams[1][1] = new GameCharacter(0, 14, 0, 7, currMap);
 	for (var i = 0; i < teams.length; i++) {
@@ -109,20 +109,6 @@ function getPositionClick(event) {
 		}
 	}
 	if (toRefresh) {
-		teamToMove++;
-		if (teamToMove >= teams.length) {
-			teamToMove = 0;
-			turn++;
-		}
-		character = teams[teamToMove];
-		for (i = 0; i < character.length; i++) {
-			character[i].currAP += (4 + Math.ceil(character[i].level / 5));
-			if (character[i].currAP > (5 + Math.ceil(character[i].level / 3))) {
-				character[i].currAP = 5 + (Math.ceil(character[i].level / 3));
-			}
-			character[i].initActionPointsMap(currMap);
-			character[i].getActionPointsMap(currMap);
-		}
 		updateTurn();
 	}
 		
@@ -193,6 +179,20 @@ function updateStatus() {
 }
 
 function updateTurn() {
+	teamToMove++;
+	if (teamToMove >= teams.length) {
+		teamToMove = 0;
+		turn++;
+	}
+	character = teams[teamToMove];
+	for (var i = 0; i < character.length; i++) {
+		character[i].currAP += (4 + Math.ceil(character[i].level / 5));
+		if (character[i].currAP > (5 + Math.ceil(character[i].level / 3))) {
+			character[i].currAP = 5 + (Math.ceil(character[i].level / 3));
+		}
+		character[i].initActionPointsMap(currMap);
+		character[i].getActionPointsMap(currMap);
+	}
 	var canvas = document.getElementById("canvas");
 	var context = canvas.getContext("2d");
 	context.clearRect(400, 510, 350, 80);
