@@ -15,10 +15,10 @@ function init() {
 	var mapNo = 3 + Math.floor(Math.random() * 4);
 	currMap = LoadMap("0" + mapNo.toString());
 	currMap.drawMap(0, 0);
-	teams[0][0] = new GameCharacter(0, 0, 0, 1, currMap);
-	teams[0][1] = new GameCharacter(9, 14, 0, 2, currMap);
-	teams[1][0] = new GameCharacter(9, 0, 0, 6, currMap);
-	teams[1][1] = new GameCharacter(0, 14, 0, 7, currMap);
+	teams[0][0] = new GameCharacter(0, 0, 1, currMap);
+	teams[0][1] = new GameCharacter(9, 14, 2, currMap);
+	teams[1][0] = new GameCharacter(9, 0, 6, currMap);
+	teams[1][1] = new GameCharacter(0, 14, 7, currMap);
 	for (var i = 0; i < teams.length; i++) {
 		for (var j = 0; j < teams[i].length; j++) {
 			teams[i][j].initActionPointsMap(currMap);
@@ -29,6 +29,7 @@ function init() {
     var canvas = document.getElementById("canvas");
     canvas.addEventListener("mousedown", getPositionClick, false);
     canvas.addEventListener("mousemove", getPositionMove, false);
+	loadAndDrawImage("images/endturn.png", 400, 550);
 	updateTurn();
 }
 
@@ -66,6 +67,11 @@ function getPositionClick(event) {
 
     x -= canvas.offsetLeft;
     y -= canvas.offsetTop;
+	
+	if (x >= 400 && x <= 485 && y >= 550 && y <= 580) {
+		updateTurn();
+		return;
+	}
 	
 	var i;
 	var j;
@@ -195,10 +201,10 @@ function updateTurn() {
 	}
 	var canvas = document.getElementById("canvas");
 	var context = canvas.getContext("2d");
-	context.clearRect(400, 510, 350, 80);
-	context.font = '18pt Calibri';
+	context.clearRect(400, 505, 200, 40);
+	context.font = '14pt Calibri';
 	context.fillStyle = 'black';
-	context.fillText("Turn: " + turn, 400, 530);
+	context.fillText("Turn: " + turn, 400, 520);
 	var teamColour;
 	switch (teamToMove) {
 		case 0:
@@ -208,7 +214,7 @@ function updateTurn() {
 			teamColour = "Blue";
 			break;
 	}
-	context.fillText(teamColour + " to move", 400, 560);
+	context.fillText(teamColour + " to move", 500, 520);
 }
 
 
@@ -326,10 +332,10 @@ function LoadMap(mapNo) {
 	return map;
 }
 
-function GameCharacter (row, col, maxAP, id, map) {
+function GameCharacter (row, col, id, map) {
 	this.row = row;
 	this.col = col;
-	this.currAP = maxAP;
+	this.currAP = 0;
 	this.id = id;
 	this.level = 1;
 	this.exp = 0;
