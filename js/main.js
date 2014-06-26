@@ -5,6 +5,7 @@ for (var i = 0; i < 2; i++) {
 	teams[i] = new Array();
 }
 var character;
+var cPoints = new Array();
 var teamToMove = -1;
 var currChar;
 var currMap;
@@ -69,6 +70,10 @@ function getPositionClick(event) {
     y -= canvas.offsetTop;
 	
 	if (x >= 400 && x <= 485 && y >= 550 && y <= 580) {
+		if (currChar != null) {
+			currChar.move(currChar.row, currChar.col);
+			currChar = null;
+		}
 		updateTurn();
 		return;
 	}
@@ -98,11 +103,13 @@ function getPositionClick(event) {
 		if (currChar.currAP <= 0 || currChar.actionPointsMap[rowMove][colMove] < 0) {
 			currChar.move(currChar.row, currChar.col);
 			currChar = null;
-			for (i = 0; i < teams.length; i++) {
-				for (j = 0; j < teams[i].length; j++) {
-					loadAndDrawImage(teams[i][j].imagePath, teams[i][j].col * 50 + 10, teams[i][j].row * 50 + 10);
+			setTimeout(function() {
+				for (i = 0; i < teams.length; i++) {
+					for (j = 0; j < teams[i].length; j++) {
+						loadAndDrawImage(teams[i][j].imagePath, teams[i][j].col * 50 + 10, teams[i][j].row * 50 + 10);
+					}
 				}
-			}
+			}, 20);
 		}
 		else {
 			currChar.toMove(currMap);
@@ -153,11 +160,17 @@ function mouseOverPrint(row, col) {
 	var j;
 	var k = 0;
 	var mouseChar = new Array();
+	var mousePoint;
 	for (i = 0; i < teams.length; i++) {
 		for (j = 0; j < teams[i].length; j++) {
 			if (teams[i][j].row === row && teams[i][j].col === col) {
 				mouseChar[k++] = teams[i][j];
 			}
+		}
+	}
+	for (i = 0; i < cPoints.length; i++) {
+		if (cPoints[i].row === row && cPoints[i].col === col) {
+			mousePoint = cPoints[i];
 		}
 	}
 	var canvas = document.getElementById("canvas");
@@ -399,9 +412,9 @@ function GameCharacter (row, col, id, map) {
 						}
 						context.clearRect(j * 50, i * 50, 50, 50);
 						loadAndDrawImage("images/" + tileStr + ".png", j * 50, i * 50);
-						if (i === row && j === col) {
+						/*if (i === row && j === col) {
 							loadAndDrawImage(this.imagePath, j * 50 + 10, i * 50 + 10)
-						}
+						}*/
 					}
 				}
 			}
