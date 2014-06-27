@@ -65,7 +65,7 @@ function ControlPoint(row, col) {
 	
 	this.resetRangeMap = function() {};
 	this.setRangeMap = function() {};
-	this.addKey = function(index) {};
+	this.addKey = function(index, team) {};
 	this.raiseKey = function(index, power) {};
 	this.lowerKey = function(index) {};
 	

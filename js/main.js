@@ -27,6 +27,12 @@ function init() {
 			teams[i][j].drawCurrPos();
 		}
 	}
+	cPoints[0] = new ControlPoint(5, 5);
+	for (var i = 0; i < cPoints.length; i++) {
+		cPoints[i].resetRangeMap();
+		cPoints[i].setRangeMap();
+		cPoints[i].drawCurrPos();
+	}
     var canvas = document.getElementById("canvas");
     canvas.addEventListener("mousedown", getPositionClick, false);
     canvas.addEventListener("mousemove", getPositionMove, false);
@@ -99,6 +105,9 @@ function getPositionClick(event) {
 				loadAndDrawImage(teams[i][j].imagePath, teams[i][j].col * 50 + 10, teams[i][j].row * 50 + 10);
 			}
 		}
+		for (i = 0; i < cPoints.length; i++) {
+			loadAndDrawImage(cPoints[i].imagePath, cPoints[i].col * 50 + 10, cPoints[i].row * 50 + 10);
+		}
 		updateStatus();
 		if (currChar.currAP <= 0 || currChar.actionPointsMap[rowMove][colMove] < 0) {
 			currChar.move(currChar.row, currChar.col);
@@ -108,6 +117,9 @@ function getPositionClick(event) {
 					for (j = 0; j < teams[i].length; j++) {
 						loadAndDrawImage(teams[i][j].imagePath, teams[i][j].col * 50 + 10, teams[i][j].row * 50 + 10);
 					}
+				}	
+				for (i = 0; i < cPoints.length; i++) {
+					loadAndDrawImage(cPoints[i].imagePath, cPoints[i].col * 50 + 10, cPoints[i].row * 50 + 10);
 				}
 			}, 20);
 		}
@@ -175,13 +187,23 @@ function mouseOverPrint(row, col) {
 	}
 	var canvas = document.getElementById("canvas");
 	var context = canvas.getContext("2d");
-	context.clearRect(0, 590, 350, 80);
+	context.clearRect(0, 590, 350, 180);
 	context.font = '10pt Calibri';
 	context.fillStyle = 'black';
 	for(i = 0; i < mouseChar.length; i++) {
 		loadAndDrawImage(mouseChar[i].imagePath, i * 50, 610)
 		context.fillText("AP: " + mouseChar[i].currAP, i * 50, 655);
 		context.fillText("Lvl: " + mouseChar[i].level, i * 50, 670);
+	}
+	if (mousePoint != null) {
+		loadAndDrawImage(mousePoint.imagePath, 10, 690);
+		context.fillText("Exp+", 70, 690);
+		context.fillText("AP+", 120, 690);
+		context.fillText("Shield", 170, 690);
+		for (i = 0; i < mousePoint.keys.length; i++) {
+			context.fillText("Lvl: " + mousePoint.keys[i].level, 70 + i * 50, 705);
+			context.fillText("TNL: " + mousePoint.keys[i].countdown, 70 + i * 50, 720);
+		}
 	}
 }
 
@@ -392,7 +414,12 @@ function GameCharacter (row, col, id, map) {
 					loadAndDrawImage("images/chargreen" + teams[i][j].id.toString() + ".png", teams[i][j].col * 50 + 10, teams[i][j].row * 50 + 10);
 				}
 			}
-		}
+		}	
+		setTimeout(function() {
+			for (i = 0; i < cPoints.length; i++) {
+				loadAndDrawImage(cPoints[i].imagePath, cPoints[i].col * 50 + 10, cPoints[i].row * 50 + 10);
+			}
+		}, 20);
 	};
 	
 	this.move = function(row, col) {
@@ -471,13 +498,16 @@ function ControlPoint(row, col) {
 	this.row = row;
 	this.col = col;
 	this.owner = -1;
-	// [range, AP, shield]
-	this.keys = [0, 0, 0];
+	// [exp, AP, shield]
+	this.keys = new Array();
+	this.imagePath = "images/cpoint" + this.owner.toString() + ".png";
+	for (var i = 0; i < 3; i++) {
+		this.keys[i] = new Key(0);
+	}
 	this.rangeMap = new Array();
 	for (var i = 0; i < currMap.map.length; i++) {
 		this.rangeMap[i] = new Array();
 	}
-	this.resetRangeMap();
 	
 	this.resetRangeMap = function() {
 		for (var i = 0; i < currMap.map.length; i++) {
@@ -490,33 +520,49 @@ function ControlPoint(row, col) {
 	this.setRangeMap = function() {
 		for (var i = 0; i < this.rangeMap.length; i++) {
 			for (var j = 0; j < this.rangeMap[i].length; j++) {
-				if (Math.abs(i - this.col) + Math.abs(j - this.row) <= (this.keys[i].level - 1) / 2) {
+				if (Math.abs(i - this.row) <= 1 && Math.abs(j - this.col) <= 1) {
 					this.rangeMap[i][j] = true;
 				}
 			}
 		}
 	};
 		
+	this.drawCurrPos = function() {
+		loadAndDrawImage(this.imagePath, (this.col * 50) + 10, (this.row * 50) + 10);
+	};
 	
-	this.addKey = function(index) {
+	this.addKey = function(index, team) {
+		if (this.owner == -1) {
+			this.owner = team;
+			this.imagePath = "images/cpoint" + this.owner.toString() + ".png";
+		}
 		this.keys[index] = new Key(1);
 	};
 	
 	this.raiseKey = function(index, power) {
-		this.keys[index].turnUpdate(power);
+		this.keys[index].raise(power);
 	};
 	
 	this.lowerKey = function(index) {
 		this.keys[index].delevel;
-		if (this.keys[index].level <= 0) {
+		if (this.keys[index].level < 0) {
 			this.keys[index].level = 0;
+		}
+		var stillOwned = false;
+		for (var i = 0; i < this.keys.length; i++) {
+			if (this.key[i].level > 0) {
+				stillOwned = true;
+			}
+		}
+		if (!stillOwned) {
+			this.owner = -1;
 		}
 	};
 }
 
 function Key(level) {
 	this.level = level;
-	this.countdown;
+	this.countdown = level;
 	
 	this.raise = function(power) {
 		if (this.level > 0) {
