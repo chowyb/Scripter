@@ -8,6 +8,7 @@ var character;
 var cPoints = new Array();
 var teamToMove = -1;
 var currChar;
+var currPoint;
 var currMap;
 var mouseRow = -1;
 var mouseCol = -1;
@@ -29,14 +30,12 @@ function init() {
 	}
 	cPoints[0] = new ControlPoint(5, 5);
 	for (var i = 0; i < cPoints.length; i++) {
-		cPoints[i].resetRangeMap();
-		cPoints[i].setRangeMap();
 		cPoints[i].drawCurrPos();
 	}
     var canvas = document.getElementById("canvas");
     canvas.addEventListener("mousedown", getPositionClick, false);
     canvas.addEventListener("mousemove", getPositionMove, false);
-	loadAndDrawImage("images/endturn.png", 400, 550);
+	loadAndDrawImage("images/endturn.png", 400, 700);
 	updateTurn();
 }
 
@@ -76,10 +75,18 @@ function getPositionClick(event) {
     x -= canvas.offsetLeft;
     y -= canvas.offsetTop;
 	
-	if (x >= 400 && x <= 485 && y >= 550 && y <= 580) {
+	if (x >= 400 && x <= 485 && y >= 700 && y <= 730) {
 		if (currChar != null) {
 			currChar.move(currChar.row, currChar.col);
 			currChar = null;
+		}
+		for (i = 0; i < teams.length; i++) {
+			for (j = 0; j < teams[i].length; j++) {
+				teams[i][j].drawCurrPos();
+			}
+		}
+		for (i = 0; i < cPoints.length; i++) {
+			cPoints[i].drawCurrPos();
 		}
 		updateTurn();
 		return;
@@ -123,6 +130,7 @@ function getPositionClick(event) {
 					cPoints[i].drawCurrPos();
 				}
 				context.clearRect(0, 510, 350, 80);
+				context.clearRect(400, 505, 350, 80);
 			}, 20);
 		}
 		else {
@@ -208,15 +216,31 @@ function mouseOverPrint(row, col) {
 }
 
 function updateStatus() {
+	currPoint = null;
+	var i;
+	for (i = 0; i < cPoints.length; i++) {
+		if (cPoints[i].row == currChar.row && cPoints[i].col == currChar.col) {
+			currPoint = cPoints[i];
+		}
+	}
 	var canvas = document.getElementById("canvas");
 	var context = canvas.getContext("2d");
 	context.clearRect(0, 510, 350, 80);
-	context.font = '12pt Calibri';
+	context.font = '10pt Calibri';
 	context.fillStyle = 'black';
 	loadAndDrawImage(currChar.imagePath, 0, 520);
 	context.fillText("AP: " + currChar.currAP, 40, 530);
 	context.fillText("Lvl: " + currChar.level, 40, 550);
 	context.fillText("Exp: " + currChar.exp + "/" + currChar.nextExp, 100, 530);
+	context.clearRect(400, 505, 350, 80);
+	if (currPoint != null) {
+		loadAndDrawImage(currPoint.imagePath, 410, 540);
+		for (i = 0; i < currPoint.keys.length; i++) {
+			context.fillText("Slot " + (i + 1), 470 + i * 50, 540);
+			context.fillText("Lvl: " + currPoint.keys[i].level, 470 + i * 50, 555);
+			context.fillText("HP: " + currPoint.keys[i].health, 470 + i * 50, 570);
+		}
+	}
 }
 
 function updateTurn() {
@@ -236,10 +260,10 @@ function updateTurn() {
 	}
 	var canvas = document.getElementById("canvas");
 	var context = canvas.getContext("2d");
-	context.clearRect(400, 505, 200, 40);
+	context.clearRect(400, 655, 200, 40);
 	context.font = '14pt Calibri';
 	context.fillStyle = 'black';
-	context.fillText("Turn: " + turn, 400, 520);
+	context.fillText("Turn: " + turn, 400, 670);
 	var teamColour;
 	switch (teamToMove) {
 		case 0:
@@ -249,7 +273,7 @@ function updateTurn() {
 			teamColour = "Blue";
 			break;
 	}
-	context.fillText(teamColour + " to move", 500, 520);
+	context.fillText(teamColour + " to move", 500, 670);
 }
 
 
@@ -503,29 +527,7 @@ function ControlPoint(row, col) {
 	for (var i = 0; i < 5; i++) {
 		this.keys[i] = new Key(0);
 	}
-	this.rangeMap = new Array();
-	for (var i = 0; i < currMap.map.length; i++) {
-		this.rangeMap[i] = new Array();
-	}
 	
-	this.resetRangeMap = function() {
-		for (var i = 0; i < currMap.map.length; i++) {
-			for (var j = 0; j < currMap.map[i].length; j++) {
-				this.rangeMap[i][j] = false;
-			}
-		}
-	};
-	
-	this.setRangeMap = function() {
-		for (var i = 0; i < this.rangeMap.length; i++) {
-			for (var j = 0; j < this.rangeMap[i].length; j++) {
-				if (Math.abs(i - this.row) <= 1 && Math.abs(j - this.col) <= 1) {
-					this.rangeMap[i][j] = true;
-				}
-			}
-		}
-	};
-		
 	this.drawCurrPos = function() {
 		loadAndDrawImage(this.imagePath, (this.col * 50) + 10, (this.row * 50) + 10);
 	};
