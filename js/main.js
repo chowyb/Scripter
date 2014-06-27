@@ -60,7 +60,8 @@ function getPositionClick(event) {
     var x = new Number();
     var y = new Number();
     var canvas = document.getElementById("canvas");
-
+	var context = canvas.getContext("2d");
+	
     if (event.x != undefined && event.y != undefined) {
         x = event.x;
         y = event.y;
@@ -102,11 +103,11 @@ function getPositionClick(event) {
 		mouseOverPrint(rowMove, colMove);
 		for (i = 0; i < teams.length; i++) {
 			for (j = 0; j < teams[i].length; j++) {
-				loadAndDrawImage(teams[i][j].imagePath, teams[i][j].col * 50 + 10, teams[i][j].row * 50 + 10);
+				teams[i][j].drawCurrPos();
 			}
 		}
 		for (i = 0; i < cPoints.length; i++) {
-			loadAndDrawImage(cPoints[i].imagePath, cPoints[i].col * 50 + 10, cPoints[i].row * 50 + 10);
+			cPoints[i].drawCurrPos();
 		}
 		updateStatus();
 		if (currChar.currAP <= 0 || currChar.actionPointsMap[rowMove][colMove] < 0) {
@@ -115,12 +116,13 @@ function getPositionClick(event) {
 			setTimeout(function() {
 				for (i = 0; i < teams.length; i++) {
 					for (j = 0; j < teams[i].length; j++) {
-						loadAndDrawImage(teams[i][j].imagePath, teams[i][j].col * 50 + 10, teams[i][j].row * 50 + 10);
+						teams[i][j].drawCurrPos();
 					}
 				}	
 				for (i = 0; i < cPoints.length; i++) {
-					loadAndDrawImage(cPoints[i].imagePath, cPoints[i].col * 50 + 10, cPoints[i].row * 50 + 10);
+					cPoints[i].drawCurrPos();
 				}
+				context.clearRect(0, 510, 350, 80);
 			}, 20);
 		}
 		else {
@@ -197,12 +199,10 @@ function mouseOverPrint(row, col) {
 	}
 	if (mousePoint != null) {
 		loadAndDrawImage(mousePoint.imagePath, 10, 690);
-		context.fillText("Exp+", 70, 690);
-		context.fillText("AP+", 120, 690);
-		context.fillText("Shield", 170, 690);
 		for (i = 0; i < mousePoint.keys.length; i++) {
+			context.fillText("Slot " + (i + 1), 70 + i * 50, 690);
 			context.fillText("Lvl: " + mousePoint.keys[i].level, 70 + i * 50, 705);
-			context.fillText("TNL: " + mousePoint.keys[i].countdown, 70 + i * 50, 720);
+			context.fillText("HP: " + mousePoint.keys[i].health, 70 + i * 50, 720);
 		}
 	}
 }
@@ -498,10 +498,9 @@ function ControlPoint(row, col) {
 	this.row = row;
 	this.col = col;
 	this.owner = -1;
-	// [exp, AP, shield]
 	this.keys = new Array();
 	this.imagePath = "images/cpoint" + this.owner.toString() + ".png";
-	for (var i = 0; i < 3; i++) {
+	for (var i = 0; i < 5; i++) {
 		this.keys[i] = new Key(0);
 	}
 	this.rangeMap = new Array();
@@ -531,51 +530,36 @@ function ControlPoint(row, col) {
 		loadAndDrawImage(this.imagePath, (this.col * 50) + 10, (this.row * 50) + 10);
 	};
 	
-	this.addKey = function(index, team) {
+	this.addKey = function(index, team, level) {
 		if (this.owner == -1) {
 			this.owner = team;
 			this.imagePath = "images/cpoint" + this.owner.toString() + ".png";
 		}
-		this.keys[index] = new Key(1);
+		this.keys[index] = new Key(level);
 	};
 	
-	this.raiseKey = function(index, power) {
-		this.keys[index].raise(power);
-	};
-	
-	this.lowerKey = function(index) {
-		this.keys[index].delevel;
-		if (this.keys[index].level < 0) {
-			this.keys[index].level = 0;
-		}
-		var stillOwned = false;
-		for (var i = 0; i < this.keys.length; i++) {
-			if (this.key[i].level > 0) {
-				stillOwned = true;
+	this.hitKey = function(index) {
+		this.keys[index].health--;
+		if (this.keys[index].health <= 0) {
+			this.keys[index] = new Key(0);
+		};
+		var isOwned = false;
+		for (var i = 0; i < keys.length; i++) {
+			if (keys[i].level > 0) {
+				isOwned = true;
 			}
 		}
-		if (!stillOwned) {
-			this.owner = -1;
+		if (!isOwned) {
+			owner = -1;
+			this.imagePath = "images/cpoint" + this.owner.toString() + ".png";
 		}
 	};
 }
 
 function Key(level) {
 	this.level = level;
-	this.countdown = level;
-	
-	this.raise = function(power) {
-		if (this.level > 0) {
-			this.countdown -= power;
-			while (countdown <= 0) {
-				this.countdown += this.level;
-				this.level++;
-			}
-		}
-	};
-	
-	this.delevel = function() {
-		this.level--;
-		this.countdown = this.level;
+	this.health = 3 + level;
+	if (level == 0) {
+		this.health = 0;
 	};
 }
