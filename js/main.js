@@ -5,11 +5,12 @@ for (var i = 0; i < 2; i++) {
 	teams[i] = new Array();
 }
 var character;
-var cPoints = new Array();
 var teamToMove = -1;
 var currChar;
-var currPoint;
 var currMap;
+var fruits = new Array();
+var fruitsEaten = 0;
+var eatenArray = [0, 0];
 var mouseRow = -1;
 var mouseCol = -1;
 var turn = 1;
@@ -23,20 +24,17 @@ function init() {
 	teams[1][1] = new GameCharacter(0, 14, 7, currMap);
 	for (var i = 0; i < teams.length; i++) {
 		for (var j = 0; j < teams[i].length; j++) {
-			teams[i][j].initActionPointsMap(currMap);
-			teams[i][j].getActionPointsMap(currMap);
 			teams[i][j].drawCurrPos();
 		}
-	}
-	cPoints[0] = new ControlPoint(5, 5);
-	for (var i = 0; i < cPoints.length; i++) {
-		cPoints[i].drawCurrPos();
 	}
     var canvas = document.getElementById("canvas");
     canvas.addEventListener("mousedown", getPositionClick, false);
     canvas.addEventListener("mousemove", getPositionMove, false);
-	loadAndDrawImage("images/endturn.png", 400, 700);
+	loadAndDrawImage("images/endturn.png", 400, 550);
 	updateTurn();
+	for (var i = 0; i < fruits.length; i++) {
+		fruits[i].drawCurrPos();
+	}
 }
 
 function loadAndDrawImage(url, x, y)
@@ -75,7 +73,8 @@ function getPositionClick(event) {
     x -= canvas.offsetLeft;
     y -= canvas.offsetTop;
 	
-	if (x >= 400 && x <= 485 && y >= 700 && y <= 730) {
+	//end turn button
+	if (x >= 400 && x <= 485 && y >= 550 && y <= 580) {
 		if (currChar != null) {
 			currChar.move(currChar.row, currChar.col);
 			currChar = null;
@@ -85,8 +84,8 @@ function getPositionClick(event) {
 				teams[i][j].drawCurrPos();
 			}
 		}
-		for (i = 0; i < cPoints.length; i++) {
-			cPoints[i].drawCurrPos();
+		for (var i = 0; i < fruits.length; i++) {
+			fruits[i].drawCurrPos();
 		}
 		updateTurn();
 		return;
@@ -113,8 +112,8 @@ function getPositionClick(event) {
 				teams[i][j].drawCurrPos();
 			}
 		}
-		for (i = 0; i < cPoints.length; i++) {
-			cPoints[i].drawCurrPos();
+		for (var i = 0; i < fruits.length; i++) {
+			fruits[i].drawCurrPos();
 		}
 		updateStatus();
 		if (currChar.currAP <= 0 || currChar.actionPointsMap[rowMove][colMove] < 0) {
@@ -125,12 +124,11 @@ function getPositionClick(event) {
 					for (j = 0; j < teams[i].length; j++) {
 						teams[i][j].drawCurrPos();
 					}
-				}	
-				for (i = 0; i < cPoints.length; i++) {
-					cPoints[i].drawCurrPos();
+				}
+				for (var i = 0; i < fruits.length; i++) {
+					fruits[i].drawCurrPos();
 				}
 				context.clearRect(0, 510, 350, 80);
-				context.clearRect(400, 505, 350, 80);
 			}, 20);
 		}
 		else {
@@ -173,6 +171,12 @@ function getPositionMove(event) {
 	if (row != mouseRow || col != mouseCol) {
 		mouseOverPrint(row, col);
 	}
+	
+	var context = canvas.getContext("2d");
+	context.clearRect(800, 100, 100, 100);
+	context.font = '10pt Calibri';
+	context.fillStyle = 'black';
+	context.fillText(x + ", " + y, 820, 120);
 }
 
 function mouseOverPrint(row, col) {
@@ -182,7 +186,6 @@ function mouseOverPrint(row, col) {
 	var j;
 	var k = 0;
 	var mouseChar = new Array();
-	var mousePoint;
 	for (i = 0; i < teams.length; i++) {
 		for (j = 0; j < teams[i].length; j++) {
 			if (teams[i][j].row === row && teams[i][j].col === col) {
@@ -190,9 +193,11 @@ function mouseOverPrint(row, col) {
 			}
 		}
 	}
-	for (i = 0; i < cPoints.length; i++) {
-		if (cPoints[i].row === row && cPoints[i].col === col) {
-			mousePoint = cPoints[i];
+	var mouseFruit;
+	for (i = 0; i < fruits.length; i++) {
+		if (fruits[i].row == row && fruits[i].col == col) {
+			mouseFruit = fruits[i];
+			break;
 		}
 	}
 	var canvas = document.getElementById("canvas");
@@ -202,68 +207,97 @@ function mouseOverPrint(row, col) {
 	context.fillStyle = 'black';
 	for(i = 0; i < mouseChar.length; i++) {
 		loadAndDrawImage(mouseChar[i].imagePath, i * 50, 610)
-		context.fillText("AP: " + mouseChar[i].currAP, i * 50, 655);
+		context.fillText("AP: " + mouseChar[i].currAP + "/" + (5 + mouseChar[i].level), i * 50, 655);
 		context.fillText("Lvl: " + mouseChar[i].level, i * 50, 670);
+		context.fillText("DgP: " + mouseChar[i].digestion, i * 50, 685);
 	}
-	if (mousePoint != null) {
-		loadAndDrawImage(mousePoint.imagePath, 10, 690);
-		for (i = 0; i < mousePoint.keys.length; i++) {
-			context.fillText("Slot " + (i + 1), 70 + i * 50, 690);
-			context.fillText("Lvl: " + mousePoint.keys[i].level, 70 + i * 50, 705);
-			context.fillText("HP: " + mousePoint.keys[i].health, 70 + i * 50, 720);
-		}
+	if (mouseFruit != null) {
+		context.fillText("Fruit: " + mouseFruit.digestCost + " turns to digest", 0, 710);
 	}
 }
 
 function updateStatus() {
-	currPoint = null;
 	var i;
-	for (i = 0; i < cPoints.length; i++) {
-		if (cPoints[i].row == currChar.row && cPoints[i].col == currChar.col) {
-			currPoint = cPoints[i];
-		}
-	}
+	var currFruitIndex = -1;
 	var canvas = document.getElementById("canvas");
 	var context = canvas.getContext("2d");
+	for (i = 0; i < fruits.length; i++) {
+		if (fruits[i].row == currChar.row && fruits[i].col == currChar.col) {
+			currFruitIndex = i;
+		}
+	}
+	
+	// eating fruit
+	if (currFruitIndex != -1) {
+		currChar.level++;
+		currChar.digestion += fruits[currFruitIndex].digestCost;
+		context.clearRect(5 + currChar.col * 50, 5 + currChar.row * 50, 40, 40);
+		currChar.drawCurrPos();
+		spawnFruit(currFruitIndex);
+		fruitsEaten++;
+		eatenArray[teamToMove]++;
+	}
 	context.clearRect(0, 510, 350, 80);
 	context.font = '10pt Calibri';
 	context.fillStyle = 'black';
 	loadAndDrawImage(currChar.imagePath, 0, 520);
-	context.fillText("AP: " + currChar.currAP, 40, 530);
-	context.fillText("Lvl: " + currChar.level, 40, 550);
-	context.fillText("Exp: " + currChar.exp + "/" + currChar.nextExp, 100, 530);
-	context.clearRect(400, 505, 350, 80);
-	if (currPoint != null) {
-		loadAndDrawImage(currPoint.imagePath, 410, 540);
-		for (i = 0; i < currPoint.keys.length; i++) {
-			context.fillText("Slot " + (i + 1), 470 + i * 50, 540);
-			context.fillText("Lvl: " + currPoint.keys[i].level, 470 + i * 50, 555);
-			context.fillText("HP: " + currPoint.keys[i].health, 470 + i * 50, 570);
-		}
+	context.fillText("Action Points: " + currChar.currAP + "/" + (5 + currChar.level), 40, 530);
+	context.fillText("Current AP Regen: " + (4 + Math.ceil(currChar.level / 3) - currChar.digestion), 40, 545);
+	context.fillText("Level: " + currChar.level, 40, 560);
+	context.fillText("Digestion Penalty: " + currChar.digestion, 40, 575);
+	context.clearRect(400, 600, 350, 80);
+	context.fillText("Fruits Eaten: ", 400, 610);
+	context.fillText("Red:  " + eatenArray[0], 400, 625);
+	context.fillText("Blue: " + eatenArray[1], 400, 640);
+	if (eatenArray[0] >= 10) {
+		window.alert("Red wins!");
+	}
+	else if (eatenArray[1] >= 10) {
+		window.alert("Blue wins!");
 	}
 }
 
 function updateTurn() {
+
+	// turn transition
 	teamToMove++;
 	if (teamToMove >= teams.length) {
 		teamToMove = 0;
 		turn++;
 	}
 	character = teams[teamToMove];
+	
+	// updating of characters
 	for (var i = 0; i < character.length; i++) {
-		character[i].currAP += (4 + Math.ceil(character[i].level / 5));
-		if (character[i].currAP > (5 + Math.ceil(character[i].level / 3))) {
-			character[i].currAP = 5 + (Math.ceil(character[i].level / 3));
+		character[i].currAP += (4 + Math.ceil(character[i].level / 3) - character[i].digestion);
+		if (character[i].currAP > (5 + character[i].level)) {
+			character[i].currAP = 5 + character[i].level;
+		}
+		if (character[i].digestion > 0) {
+			character[i].digestion--;
 		}
 		character[i].initActionPointsMap(currMap);
 		character[i].getActionPointsMap(currMap);
 	}
+	
+	// updating and spawning of fruits
+	for (var i = 0; i < fruits.length; i++) {
+		if (fruits[i].digestCost > 0) {
+			fruits[i].digestCost--;
+		}
+	}
+	if (fruits.length * 10 < turn) {
+		spawnFruit(fruits.length);
+	}
+	
+	
+	// display
 	var canvas = document.getElementById("canvas");
 	var context = canvas.getContext("2d");
-	context.clearRect(400, 655, 200, 40);
+	context.clearRect(400, 505, 200, 40);
 	context.font = '14pt Calibri';
 	context.fillStyle = 'black';
-	context.fillText("Turn: " + turn, 400, 670);
+	context.fillText("Turn: " + turn, 400, 520);
 	var teamColour;
 	switch (teamToMove) {
 		case 0:
@@ -273,9 +307,34 @@ function updateTurn() {
 			teamColour = "Blue";
 			break;
 	}
-	context.fillText(teamColour + " to move", 500, 670);
+	window.alert(teamColour + " to move!");
+	context.fillText(teamColour + " to move", 500, 520);
 }
 
+function spawnFruit(index) {
+	var row;
+	var col;
+	var loop = true;
+	var cost = Math.floor(Math.random() * (5 + Math.floor(fruitsEaten / 10)));
+	while (loop) {
+		loop = false;
+		row = Math.floor(Math.random() * currMap.map.length);
+		col = Math.floor(Math.random() * currMap.map[0].length);
+		for (var i = 0; i < teams.length; i++) {
+			for (var j = 0; j < teams[i].length; j++) {
+				if (teams[i][j].row == row && teams[i][j].col == col) {
+					loop = true;
+				}
+			}
+		}
+		for (var i = 0; i < fruits.length; i++) {
+			if (fruits[i].row == row && fruits[i].col == col) {
+				loop = true;
+			}
+		}
+	}
+	fruits[index] = new Fruit(row, col, cost);
+}
 
 function HoriWall(rows, cols) {
 	this.wallArr = new Array();
@@ -397,22 +456,12 @@ function GameCharacter (row, col, id, map) {
 	this.currAP = 0;
 	this.id = id;
 	this.level = 1;
-	this.exp = 0;
-	this.nextExp = 10;
 	this.imagePath = "images/char" + id.toString() + ".png";
 	this.actionPointsMap = new Array();
 	for (var i = 0; i < map.map.length; i++) {
 		this.actionPointsMap[i] = new Array();
 	}
-	
-	this.gainExp = function(addedExp) {
-		this.exp += addedExp;
-		while (this.exp >= this.nextExp) {
-			this.exp -= this.nextExp;
-			this.level++;
-			this.nextExp = level * 10;
-		}
-	};
+	this.digestion = 0;
 	
 	this.toMove = function(map) {
 		this.initActionPointsMap(map);
@@ -440,8 +489,8 @@ function GameCharacter (row, col, id, map) {
 			}
 		}	
 		setTimeout(function() {
-			for (i = 0; i < cPoints.length; i++) {
-				loadAndDrawImage(cPoints[i].imagePath, cPoints[i].col * 50 + 10, cPoints[i].row * 50 + 10);
+			for (var i = 0; i < fruits.length; i++) {
+				fruits[i].drawCurrPos();
 			}
 		}, 20);
 	};
@@ -463,9 +512,6 @@ function GameCharacter (row, col, id, map) {
 						}
 						context.clearRect(j * 50, i * 50, 50, 50);
 						loadAndDrawImage("images/" + tileStr + ".png", j * 50, i * 50);
-						/*if (i === row && j === col) {
-							loadAndDrawImage(this.imagePath, j * 50 + 10, i * 50 + 10)
-						}*/
 					}
 				}
 			}
@@ -518,50 +564,13 @@ function GameCharacter (row, col, id, map) {
 	};
 }
 
-function ControlPoint(row, col) {
+function Fruit(row, col, digestCost) {
 	this.row = row;
 	this.col = col;
-	this.owner = -1;
-	this.keys = new Array();
-	this.imagePath = "images/cpoint" + this.owner.toString() + ".png";
-	for (var i = 0; i < 5; i++) {
-		this.keys[i] = new Key(0);
-	}
+	this.digestCost = digestCost;
+	this.imagePath = "images/cpoint-1.png";
 	
 	this.drawCurrPos = function() {
 		loadAndDrawImage(this.imagePath, (this.col * 50) + 10, (this.row * 50) + 10);
-	};
-	
-	this.addKey = function(index, team, level) {
-		if (this.owner == -1) {
-			this.owner = team;
-			this.imagePath = "images/cpoint" + this.owner.toString() + ".png";
-		}
-		this.keys[index] = new Key(level);
-	};
-	
-	this.hitKey = function(index) {
-		this.keys[index].health--;
-		if (this.keys[index].health <= 0) {
-			this.keys[index] = new Key(0);
-		};
-		var isOwned = false;
-		for (var i = 0; i < keys.length; i++) {
-			if (keys[i].level > 0) {
-				isOwned = true;
-			}
-		}
-		if (!isOwned) {
-			owner = -1;
-			this.imagePath = "images/cpoint" + this.owner.toString() + ".png";
-		}
-	};
-}
-
-function Key(level) {
-	this.level = level;
-	this.health = 3 + level;
-	if (level == 0) {
-		this.health = 0;
-	};
+	}
 }
