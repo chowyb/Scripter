@@ -15,7 +15,8 @@ var mouseRow = -1;
 var mouseCol = -1;
 var turn = 1;
 function init() {
-	var mapNo = 3 + Math.floor(Math.random() * 4);
+	//var mapNo = 3 + Math.floor(Math.random() * 4);
+	var mapNo = 1;
 	currMap = LoadMap("0" + mapNo.toString());
 	currMap.drawMap(0, 0);
 	teams[0][0] = new GameCharacter(0, 0, 1, currMap);
@@ -128,7 +129,7 @@ function getPositionClick(event) {
 				for (var i = 0; i < fruits.length; i++) {
 					fruits[i].drawCurrPos();
 				}
-				context.clearRect(0, 510, 350, 80);
+				context.clearRect(0, 585, 350, 120);
 			}, 20);
 		}
 		else {
@@ -172,11 +173,11 @@ function getPositionMove(event) {
 		mouseOverPrint(row, col);
 	}
 	
-	var context = canvas.getContext("2d");
+	/*var context = canvas.getContext("2d");
 	context.clearRect(800, 100, 100, 100);
 	context.font = '10pt Calibri';
 	context.fillStyle = 'black';
-	context.fillText(x + ", " + y, 820, 120);
+	context.fillText(x + ", " + y, 820, 120);*/
 }
 
 function mouseOverPrint(row, col) {
@@ -202,17 +203,26 @@ function mouseOverPrint(row, col) {
 	}
 	var canvas = document.getElementById("canvas");
 	var context = canvas.getContext("2d");
-	context.clearRect(0, 590, 350, 180);
-	context.font = '10pt Calibri';
+	context.clearRect(0, 585, 350, 120);
+	context.font = '12pt Calibri';
 	context.fillStyle = 'black';
-	for(i = 0; i < mouseChar.length; i++) {
-		loadAndDrawImage(mouseChar[i].imagePath, i * 50, 610)
-		context.fillText("AP: " + mouseChar[i].currAP + "/" + (5 + mouseChar[i].level), i * 50, 655);
-		context.fillText("Lvl: " + mouseChar[i].level, i * 50, 670);
-		context.fillText("DgP: " + mouseChar[i].digestion, i * 50, 685);
+	if (currChar != null) {
+		if (currChar.actionPointsMap[row][col] >= 0) {
+			context.fillText(currChar.actionPointsMap[row][col] + " AP left after moving", 0, 600);
+		}
+		else if (currChar.actionPointsMap[row][col] < 0) {
+			context.fillText("Out of range", 0, 600);
+		}
 	}
 	if (mouseFruit != null) {
-		context.fillText("Fruit: " + mouseFruit.digestCost + " turns to digest", 0, 710);
+		context.fillText("Fruit: " + mouseFruit.digestCost + " turns to digest", 0, 620);
+	}
+	for(i = 0; i < mouseChar.length; i++) {
+		context.font = '10pt Calibri';
+		loadAndDrawImage(mouseChar[i].imagePath, i * 50, 620)
+		context.fillText("AP: " + mouseChar[i].currAP + "/" + (5 + mouseChar[i].level), i * 50, 665);
+		context.fillText("Lvl: " + mouseChar[i].level, i * 50, 680);
+		context.fillText("DgP: " + mouseChar[i].digestion, i * 50, 695);
 	}
 }
 
@@ -315,7 +325,7 @@ function spawnFruit(index) {
 	var row;
 	var col;
 	var loop = true;
-	var cost = Math.floor(Math.random() * (5 + Math.floor(fruitsEaten / 10)));
+	var cost = Math.floor(Math.random() * (8 + Math.floor(fruitsEaten / 10)));
 	while (loop) {
 		loop = false;
 		row = Math.floor(Math.random() * currMap.map.length);
