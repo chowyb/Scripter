@@ -1,22 +1,32 @@
 window.addEventListener("DOMContentLoaded", init, false); 
 
-var teams = new Array();
-for (var i = 0; i < 2; i++) {
-	teams[i] = new Array();
-}
+var teams;
 var character;
-var teamToMove = -1;
+var teamToMove;
 var currChar;
 var currMap;
-var fruits = new Array();
-var fruitsEaten = 0;
-var eatenArray = [0, 0];
-var mouseRow = -1;
-var mouseCol = -1;
-var turn = 1;
+var fruits;
+var fruitsEaten;
+var eatenArray;
+var mouseRow;
+var mouseCol;
+var turn;
+var inPlay;
 function init() {
+	teams = new Array();
+	for (var i = 0; i < 2; i++) {
+		teams[i] = new Array();
+	}
 	//var mapNo = 3 + Math.floor(Math.random() * 4);
+	teamToMove = -1;
+	fruits = new Array();
+	fruitsEaten = 0;
+	eatenArray = [0, 0];
+	mouseRow = -1;
+	mouseCol = -1;
+	turn = 1;
 	var mapNo = 1;
+	inPlay = true;
 	currMap = LoadMap("0" + mapNo.toString());
 	currMap.drawMap(0, 0);
 	teams[0][0] = new GameCharacter(0, 0, 1, currMap);
@@ -55,97 +65,98 @@ function loadAndDrawImage(url, x, y)
 }
 
 function getPositionClick(event) {
-    var x = new Number();
-    var y = new Number();
-    var canvas = document.getElementById("canvas");
-	var context = canvas.getContext("2d");
+	if (inPlay) {
+		var x = new Number();
+		var y = new Number();
+		var canvas = document.getElementById("canvas");
+		var context = canvas.getContext("2d");
 	
-    if (event.x != undefined && event.y != undefined) {
-        x = event.x;
-        y = event.y;
-    }
-    else { // Firefox method to get the position
-        x = event.clientX + document.body.scrollLeft +
-            document.documentElement.scrollLeft;
-        y = event.clientY + document.body.scrollTop +
-            document.documentElement.scrollTop;
-    }
+		if (event.x != undefined && event.y != undefined) {
+			x = event.x;
+			y = event.y;
+		}
+		else { // Firefox method to get the position
+			x = event.clientX + document.body.scrollLeft +
+				document.documentElement.scrollLeft;
+			y = event.clientY + document.body.scrollTop +
+				document.documentElement.scrollTop;
+		}
 
-    x -= canvas.offsetLeft;
-    y -= canvas.offsetTop;
+		x -= canvas.offsetLeft;
+		y -= canvas.offsetTop;
 	
-	//end turn button
-	if (x >= 400 && x <= 485 && y >= 550 && y <= 580) {
+		//end turn button
+		if (x >= 400 && x <= 485 && y >= 550 && y <= 580) {
+			if (currChar != null) {
+				currChar.move(currChar.row, currChar.col);
+				currChar = null;
+			}
+			for (i = 0; i < teams.length; i++) {
+				for (j = 0; j < teams[i].length; j++) {
+					teams[i][j].drawCurrPos();
+				}
+			}
+			for (var i = 0; i < fruits.length; i++) {
+				fruits[i].drawCurrPos();
+			}
+			updateTurn();
+			return;
+		}
+	
+		var i;
+		var j;
+		if (currChar == null) {
+			var row = Math.floor(y / 50);
+			var col = Math.floor(x / 50);
+			for (i = 0; i < character.length; i++) {
+				if (character[i].row === row && character[i].col === col && character[i].currAP > 0) {
+					currChar = character[i];
+				}
+			}
+		}
 		if (currChar != null) {
-			currChar.move(currChar.row, currChar.col);
-			currChar = null;
-		}
-		for (i = 0; i < teams.length; i++) {
-			for (j = 0; j < teams[i].length; j++) {
-				teams[i][j].drawCurrPos();
+			var rowMove = Math.floor(y / 50);
+			var colMove = Math.floor(x / 50);
+			currChar.move(rowMove, colMove);
+			mouseOverPrint(rowMove, colMove);
+			for (i = 0; i < teams.length; i++) {
+				for (j = 0; j < teams[i].length; j++) {
+					teams[i][j].drawCurrPos();
+				}
 			}
-		}
-		for (var i = 0; i < fruits.length; i++) {
-			fruits[i].drawCurrPos();
-		}
-		updateTurn();
-		return;
-	}
-	
-	var i;
-	var j;
-	if (currChar == null) {
-		var row = Math.floor(y / 50);
-		var col = Math.floor(x / 50);
-		for (i = 0; i < character.length; i++) {
-			if (character[i].row === row && character[i].col === col && character[i].currAP > 0) {
-				currChar = character[i];
+			for (var i = 0; i < fruits.length; i++) {
+				fruits[i].drawCurrPos();
 			}
-		}
-	}
-	if (currChar != null) {
-		var rowMove = Math.floor(y / 50);
-		var colMove = Math.floor(x / 50);
-		currChar.move(rowMove, colMove);
-		mouseOverPrint(rowMove, colMove);
-		for (i = 0; i < teams.length; i++) {
-			for (j = 0; j < teams[i].length; j++) {
-				teams[i][j].drawCurrPos();
-			}
-		}
-		for (var i = 0; i < fruits.length; i++) {
-			fruits[i].drawCurrPos();
-		}
-		updateStatus();
-		if (currChar.currAP <= 0 || currChar.actionPointsMap[rowMove][colMove] < 0) {
-			currChar.move(currChar.row, currChar.col);
-			currChar = null;
-			setTimeout(function() {
-				for (i = 0; i < teams.length; i++) {
-					for (j = 0; j < teams[i].length; j++) {
-						teams[i][j].drawCurrPos();
+			updateStatus();
+			if (currChar.currAP <= 0 || currChar.actionPointsMap[rowMove][colMove] < 0) {
+				currChar.move(currChar.row, currChar.col);
+				currChar = null;
+				setTimeout(function() {
+					for (i = 0; i < teams.length; i++) {
+						for (j = 0; j < teams[i].length; j++) {
+							teams[i][j].drawCurrPos();
+						}
 					}
-				}
-				for (var i = 0; i < fruits.length; i++) {
-					fruits[i].drawCurrPos();
-				}
-				context.clearRect(0, 585, 350, 120);
-			}, 20);
+					for (var i = 0; i < fruits.length; i++) {
+						fruits[i].drawCurrPos();
+					}
+					context.clearRect(0, 585, 350, 120);
+				}, 20);
+			}
+			else {
+				currChar.toMove(currMap);
+			}
 		}
-		else {
-			currChar.toMove(currMap);
+		var toRefresh = true;
+		for (i = 0; i < character.length; i++) {
+			if (character[i].currAP > 0) {
+				toRefresh = false;
+			}
 		}
-	}
-	var toRefresh = true;
-	for (i = 0; i < character.length; i++) {
-		if (character[i].currAP > 0) {
-			toRefresh = false;
+		if (toRefresh) {
+			updateTurn();
 		}
-	}
-	if (toRefresh) {
-		updateTurn();
-	}
-		
+	}	
 }
 
 function getPositionMove(event) {
@@ -259,66 +270,70 @@ function updateStatus() {
 	context.fillText("Fruits Eaten: ", 400, 610);
 	context.fillText("Red:  " + eatenArray[0], 400, 625);
 	context.fillText("Blue: " + eatenArray[1], 400, 640);
-	if (eatenArray[0] >= 10) {
+	if (eatenArray[0] >= 1) {
 		window.alert("Red wins!");
+		inPlay = false;
 	}
-	else if (eatenArray[1] >= 10) {
+	else if (eatenArray[1] >= 1) {
 		window.alert("Blue wins!");
+		inPlay = false;
 	}
 }
 
 function updateTurn() {
+	if (inPlay) {
 
-	// turn transition
-	teamToMove++;
-	if (teamToMove >= teams.length) {
-		teamToMove = 0;
-		turn++;
-	}
-	character = teams[teamToMove];
-	
-	// updating of characters
-	for (var i = 0; i < character.length; i++) {
-		character[i].currAP += (4 + Math.ceil(character[i].level / 3) - character[i].digestion);
-		if (character[i].currAP > (5 + character[i].level)) {
-			character[i].currAP = 5 + character[i].level;
+		// turn transition
+		teamToMove++;
+		if (teamToMove >= teams.length) {
+			teamToMove = 0;
+			turn++;
 		}
-		if (character[i].digestion > 0) {
-			character[i].digestion--;
+		character = teams[teamToMove];
+	
+		// updating of characters
+		for (var i = 0; i < character.length; i++) {
+			character[i].currAP += (4 + Math.ceil(character[i].level / 3) - character[i].digestion);
+			if (character[i].currAP > (5 + character[i].level)) {
+				character[i].currAP = 5 + character[i].level;
+			}
+			if (character[i].digestion > 0) {
+				character[i].digestion--;
+			}
+			character[i].initActionPointsMap(currMap);
+			character[i].getActionPointsMap(currMap);
 		}
-		character[i].initActionPointsMap(currMap);
-		character[i].getActionPointsMap(currMap);
-	}
 	
-	// updating and spawning of fruits
-	for (var i = 0; i < fruits.length; i++) {
-		if (fruits[i].digestCost > 0) {
-			fruits[i].digestCost--;
+		// updating and spawning of fruits
+		for (var i = 0; i < fruits.length; i++) {
+			if (fruits[i].digestCost > 0) {
+				fruits[i].digestCost--;
+			}
 		}
-	}
-	if (fruits.length * 10 < turn) {
-		spawnFruit(fruits.length);
-	}
+		if (fruits.length * 10 < turn) {
+			spawnFruit(fruits.length);
+		}
 	
 	
-	// display
-	var canvas = document.getElementById("canvas");
-	var context = canvas.getContext("2d");
-	context.clearRect(400, 505, 200, 40);
-	context.font = '14pt Calibri';
-	context.fillStyle = 'black';
-	context.fillText("Turn: " + turn, 400, 520);
-	var teamColour;
-	switch (teamToMove) {
-		case 0:
-			teamColour = "Red";
-			break;
-		case 1:
-			teamColour = "Blue";
-			break;
+		// display
+		var canvas = document.getElementById("canvas");
+		var context = canvas.getContext("2d");
+		context.clearRect(400, 505, 200, 40);
+		context.font = '14pt Calibri';
+		context.fillStyle = 'black';
+		context.fillText("Turn: " + turn, 400, 520);
+		var teamColour;
+		switch (teamToMove) {
+			case 0:
+				teamColour = "Red";
+				break;
+			case 1:
+				teamColour = "Blue";
+				break;
+		}
+		window.alert(teamColour + " to move!");
+		context.fillText(teamColour + " to move", 500, 520);
 	}
-	window.alert(teamColour + " to move!");
-	context.fillText(teamColour + " to move", 500, 520);
 }
 
 function spawnFruit(index) {
