@@ -65,26 +65,26 @@ function loadAndDrawImage(url, x, y)
 }
 
 function getPositionClick(event) {
-	if (inPlay) {
-		var x = new Number();
-		var y = new Number();
-		var canvas = document.getElementById("canvas");
-		var context = canvas.getContext("2d");
+	var x = new Number();
+	var y = new Number();
+	var canvas = document.getElementById("canvas");
+	var context = canvas.getContext("2d");
 	
-		if (event.x != undefined && event.y != undefined) {
-			x = event.x;
-			y = event.y;
-		}
-		else { // Firefox method to get the position
-			x = event.clientX + document.body.scrollLeft +
-				document.documentElement.scrollLeft;
-			y = event.clientY + document.body.scrollTop +
-				document.documentElement.scrollTop;
-		}
+	if (event.x != undefined && event.y != undefined) {
+		x = event.x;
+		y = event.y;
+	}
+	else { // Firefox method to get the position
+		x = event.clientX + document.body.scrollLeft +
+			document.documentElement.scrollLeft;
+		y = event.clientY + document.body.scrollTop +
+			document.documentElement.scrollTop;
+	}
 
-		x -= canvas.offsetLeft;
-		y -= canvas.offsetTop;
+	x -= canvas.offsetLeft;
+	y -= canvas.offsetTop;
 	
+	if (inPlay) {
 		//end turn button
 		if (x >= 400 && x <= 485 && y >= 550 && y <= 580) {
 			if (currChar != null) {
@@ -156,7 +156,12 @@ function getPositionClick(event) {
 		if (toRefresh) {
 			updateTurn();
 		}
-	}	
+	}
+	else {
+		if (x >= 400 && x <= 485 && y >= 550 && y <= 580) {
+			init();
+		}
+	}
 }
 
 function getPositionMove(event) {
@@ -331,7 +336,6 @@ function updateTurn() {
 				teamColour = "Blue";
 				break;
 		}
-		window.alert(teamColour + " to move!");
 		context.fillText(teamColour + " to move", 500, 520);
 	}
 }
@@ -493,11 +497,13 @@ function GameCharacter (row, col, id, map) {
 		this.getActionPointsMap(map);
 		var canvas = document.getElementById("canvas");
 		var context = canvas.getContext("2d");
+		var tileNo;
+		var tileStr;
 		for (var i = 0; i < map.map.length; i++) {
 			for (var j = 0; j < map.map[0].length; j++) {
 				if (this.actionPointsMap[i][j] >= 0) {
-					var tileNo = map.map[i][j] + 16;
-					var tileStr = tileNo.toString();
+					tileNo = map.map[i][j] + 16;
+					tileStr = tileNo.toString();
 					while (tileStr.length < 4) {
 						tileStr = "0" + tileStr;
 					}
