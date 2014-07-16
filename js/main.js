@@ -340,6 +340,77 @@ function updateTurn() {
 	}
 }
 
+function tileUpdate(row, col) {
+	var canvas = document.getElementById("canvas");
+	var context = canvas.getContext("2d");
+	context.clearRect(col * 50, row * 50, 50, 50);
+	var tileNo = currMap.map[i][j];
+	var tileStr = tileNo.toString();
+	while (tileStr.length < 4) {
+		tileStr = "0" + tileStr;
+	}
+	for (var i = 0; i < teams.length; i++) {
+		if (i != teamToMove) {
+			for (var j = 0; j < teams[i].length; j++) {
+				if (teams[i][j].row == row && teams[i][j].col == col) {
+					teams[i][j].drawCurrPosDim();
+				}
+			}
+		}
+	}
+	for (var i = 0; i < teams[teamToMove].length; i++) {
+		if (teams[i][j].row == row && teams[i][j].col == col) {
+			if (teams[i][j].currAP <= 0) {
+				teams[i][j].drawCurrPosDim();
+			}
+			else {
+				teams[i][j].drawCurrPos();
+			}
+		}
+	}
+	for (var i = 0; i < fruits.length; i++) {
+		if (fruits[i].row == row && fruits[i].col == col) {
+			fruits[i].drawCurrPos();
+		}
+	}
+}
+
+function tileUpdateGreen(row, col) {
+	var canvas = document.getElementById("canvas");
+	var context = canvas.getContext("2d");
+	context.clearRect(col * 50, row * 50, 50, 50);
+	var tileNo = currMap.map[i][j];
+	tileNo += 16;
+	var tileStr = tileNo.toString();
+	while (tileStr.length < 4) {
+		tileStr = "0" + tileStr;
+	}
+	for (var i = 0; i < teams.length; i++) {
+		if (i != teamToMove) {
+			for (var j = 0; j < teams[i].length; j++) {
+				if (teams[i][j].row == row && teams[i][j].col == col) {
+					teams[i][j].drawCurrPosGreenDim();
+				}
+			}
+		}
+	}
+	for (var i = 0; i < teams[teamToMove].length; i++) {
+		if (teams[i][j].row == row && teams[i][j].col == col) {
+			if (teams[i][j].currAP <= 0) {
+				teams[i][j].drawCurrPosGreenDim();
+			}
+			else {
+				teams[i][j].drawCurrPosGreen();
+			}
+		}
+	}
+	for (var i = 0; i < fruits.length; i++) {
+		if (fruits[i].row == row && fruits[i].col == col) {
+			fruits[i].drawCurrPos();
+		}
+	}
+}
+
 function spawnFruit(index) {
 	var row;
 	var col;
@@ -515,7 +586,7 @@ function GameCharacter (row, col, id, map) {
 		for (var i = 0; i < teams.length; i++) {
 			for (var j = 0; j < teams[i].length; j++) {
 				if (this.actionPointsMap[teams[i][j].row][teams[i][j].col] >= 0) {
-					loadAndDrawImage("images/chargreen" + teams[i][j].id.toString() + ".png", teams[i][j].col * 50 + 10, teams[i][j].row * 50 + 10);
+					teams[i][j].drawCurrPosGreen();
 				}
 			}
 		}	
@@ -559,6 +630,18 @@ function GameCharacter (row, col, id, map) {
 		
 	this.drawCurrPos = function() {
 		loadAndDrawImage(this.imagePath, (this.col * 50) + 10, (this.row * 50) + 10);
+	};
+	
+	this.drawCurrPosDim = function() {
+		loadAndDrawImage("images/char" + id.toString() + "dim.png", (this.col * 50) + 10, (this.row * 50) + 10);
+	};
+	
+	this.drawCurrPosGreen = function() {
+		loadAndDrawImage("images/chargreen" + id.toString() + ".png", (this.col * 50) + 10, (this.row * 50) + 10);
+	};
+	
+	this.drawCurrPosGreenDim = function() {
+		loadAndDrawImage("images/chargreen" + id.toString() + "dim.png", (this.col * 50) + 10, (this.row * 50) + 10);
 	};
 	
 	this.getActionPointsMap = function(map) {
