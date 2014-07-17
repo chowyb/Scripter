@@ -33,16 +33,16 @@ function init() {
 	teams[0][1] = new GameCharacter(9, 14, 2, currMap);
 	teams[1][0] = new GameCharacter(9, 0, 6, currMap);
 	teams[1][1] = new GameCharacter(0, 14, 7, currMap);
-	for (var i = 0; i < teams.length; i++) {
-		for (var j = 0; j < teams[i].length; j++) {
-			teams[i][j].drawCurrPos();
-		}
-	}
     var canvas = document.getElementById("canvas");
     canvas.addEventListener("mousedown", getPositionClick, false);
     canvas.addEventListener("mousemove", getPositionMove, false);
 	loadAndDrawImage("images/endturn.png", 400, 550);
 	updateTurn();
+	for (var i = 0; i < teams.length; i++) {
+		for (var j = 0; j < teams[i].length; j++) {
+			teams[i][j].drawCurrPos();
+		}
+	}
 	for (var i = 0; i < fruits.length; i++) {
 		fruits[i].drawCurrPos();
 	}
@@ -235,7 +235,7 @@ function mouseOverPrint(row, col) {
 	}
 	for(i = 0; i < mouseChar.length; i++) {
 		context.font = '10pt Calibri';
-		loadAndDrawImage(mouseChar[i].imagePath, i * 50, 620)
+		loadAndDrawImage("images/char" + mouseChar[i].imagePath + ".png", i * 50, 620)
 		context.fillText("AP: " + mouseChar[i].currAP + "/" + (5 + mouseChar[i].level), i * 50, 665);
 		context.fillText("Lvl: " + mouseChar[i].level, i * 50, 680);
 		context.fillText("DgP: " + mouseChar[i].digestion, i * 50, 695);
@@ -266,7 +266,7 @@ function updateStatus() {
 	context.clearRect(0, 510, 350, 80);
 	context.font = '10pt Calibri';
 	context.fillStyle = 'black';
-	loadAndDrawImage(currChar.imagePath, 0, 520);
+	loadAndDrawImage("images/char" + currChar.imagePath + ".png", 0, 520);
 	context.fillText("Action Points: " + currChar.currAP + "/" + (5 + currChar.level), 40, 530);
 	context.fillText("Current AP Regen: " + (4 + Math.ceil(currChar.level / 3) - currChar.digestion), 40, 545);
 	context.fillText("Level: " + currChar.level, 40, 560);
@@ -344,7 +344,7 @@ function tileUpdate(row, col) {
 	var canvas = document.getElementById("canvas");
 	var context = canvas.getContext("2d");
 	context.clearRect(col * 50, row * 50, 50, 50);
-	var tileNo = currMap.map[i][j];
+	var tileNo = currMap.map[row][col];
 	var tileStr = tileNo.toString();
 	while (tileStr.length < 4) {
 		tileStr = "0" + tileStr;
@@ -379,12 +379,14 @@ function tileUpdateGreen(row, col) {
 	var canvas = document.getElementById("canvas");
 	var context = canvas.getContext("2d");
 	context.clearRect(col * 50, row * 50, 50, 50);
-	var tileNo = currMap.map[i][j];
+	var tileNo = currMap.map[row][col];
 	tileNo += 16;
 	var tileStr = tileNo.toString();
 	while (tileStr.length < 4) {
 		tileStr = "0" + tileStr;
 	}
+	window.alert(tileStr);
+	loadAndDrawImage(tileStr + ".png", col * 50, row * 50);
 	for (var i = 0; i < teams.length; i++) {
 		if (i != teamToMove) {
 			for (var j = 0; j < teams[i].length; j++) {
@@ -556,12 +558,19 @@ function GameCharacter (row, col, id, map) {
 	this.currAP = 0;
 	this.id = id;
 	this.level = 1;
-	this.imagePath = "images/char" + id.toString() + ".png";
+	this.imagePath;
 	this.actionPointsMap = new Array();
 	for (var i = 0; i < map.map.length; i++) {
 		this.actionPointsMap[i] = new Array();
 	}
 	this.digestion = 0;
+	
+	if (this.id < 5) {
+		this.imagePath = "red";
+	}
+	else {
+		this.imagePath = "blue";
+	}
 	
 	this.toMove = function(map) {
 		this.initActionPointsMap(map);
@@ -629,19 +638,29 @@ function GameCharacter (row, col, id, map) {
 	};
 		
 	this.drawCurrPos = function() {
-		loadAndDrawImage(this.imagePath, (this.col * 50) + 10, (this.row * 50) + 10);
+		if (this.currAP <= 0 || Math.floor(this.id / 5) != teamToMove) {
+			loadAndDrawImage("images/char" + this.imagePath + "dim.png", (this.col * 50) + 10, (this.row * 50) + 10);
+		}
+		else {
+			loadAndDrawImage("images/char" + this.imagePath + ".png", (this.col * 50) + 10, (this.row * 50) + 10);
+		}
 	};
 	
 	this.drawCurrPosDim = function() {
-		loadAndDrawImage("images/char" + id.toString() + "dim.png", (this.col * 50) + 10, (this.row * 50) + 10);
+		loadAndDrawImage("images/char" + this.imagePath + "dim.png", (this.col * 50) + 10, (this.row * 50) + 10);
 	};
 	
 	this.drawCurrPosGreen = function() {
-		loadAndDrawImage("images/chargreen" + id.toString() + ".png", (this.col * 50) + 10, (this.row * 50) + 10);
+		if (this.currAP <= 0 || Math.floor(this.id / 5) != teamToMove) {
+			loadAndDrawImage("images/char" + this.imagePath + "greendim.png", (this.col * 50) + 10, (this.row * 50) + 10);
+		}
+		else {
+			loadAndDrawImage("images/char" + this.imagePath + "green.png", (this.col * 50) + 10, (this.row * 50) + 10);
+		}
 	};
 	
 	this.drawCurrPosGreenDim = function() {
-		loadAndDrawImage("images/chargreen" + id.toString() + "dim.png", (this.col * 50) + 10, (this.row * 50) + 10);
+		loadAndDrawImage("images/char" + this.imagePath + "greendim.png", (this.col * 50) + 10, (this.row * 50) + 10);
 	};
 	
 	this.getActionPointsMap = function(map) {
