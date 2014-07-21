@@ -198,21 +198,72 @@ function getPositionMove(event) {
 }
 
 function getKeyDown(event) {
-	if (event.keyCode == 81) {
-		if (currChar != null) {
-			currChar.move(currChar.row, currChar.col);
-			currChar = null;
-			setTimeout(function() {
-				for (i = 0; i < teams.length; i++) {
-					for (j = 0; j < teams[i].length; j++) {
-						teams[i][j].drawCurrPos();
+	var i;
+	var j;
+	var tempChar;
+	var compCharID;
+	var possibleMatch = false;
+	if (inPlay) {
+		if (event.keyCode == 81) {
+			if (currChar != null) {
+				compCharID = currChar.id;
+			}
+			else {
+				compCharID = -1;
+			}
+			for (i = 0; i < character.length; i++) {
+				if (character[i].currAP > 0) {
+					possibleMatch = true;
+					if (character[i].id > compCharID) {
+						tempChar = character[i];
+						break;
 					}
 				}
-				for (var i = 0; i < fruits.length; i++) {
-					fruits[i].drawCurrPos();
+			}
+			if (possibleMatch && tempChar == null) {
+				for (i = 0; i < character.length; i++) {
+					if (character[i].currAP > 0 && character[i].id != compCharID) {
+						tempChar = character[i];
+					}
 				}
-				context.clearRect(0, 585, 350, 120);
-			}, 20);
+			}
+			if (currChar != null && tempChar != null) {
+				currChar.move(currChar.row, currChar.col);
+				currChar = null;
+				setTimeout(function() {
+					for (i = 0; i < teams.length; i++) {
+						for (j = 0; j < teams[i].length; j++) {
+							teams[i][j].drawCurrPos();
+						}
+					}
+					for (i = 0; i < fruits.length; i++) {
+						fruits[i].drawCurrPos();
+					}
+					context.clearRect(0, 585, 350, 120);
+				}, 20);
+			}
+			if (tempChar != null) {
+				currChar = tempChar;
+				updateStatus();
+				setTimeout(function() {
+					tempChar.toMove(currMap);
+				}, 20);
+			}
+		}
+		else if (event.keyCode == 69) {
+			if (currChar != null) {
+				currChar.move(currChar.row, currChar.col);
+				currChar = null;
+			}
+			for (i = 0; i < teams.length; i++) {
+				for (j = 0; j < teams[i].length; j++) {
+					teams[i][j].drawCurrPos();
+				}
+			}
+			for (var i = 0; i < fruits.length; i++) {
+				fruits[i].drawCurrPos();
+			}
+			updateTurn();
 		}
 	}
 }
