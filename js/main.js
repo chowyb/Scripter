@@ -17,7 +17,6 @@ function init() {
 	for (var i = 0; i < 2; i++) {
 		teams[i] = new Array();
 	}
-	//var mapNo = 3 + Math.floor(Math.random() * 4);
 	teamToMove = -1;
 	fruits = new Array();
 	fruitsEaten = 0;
@@ -36,6 +35,8 @@ function init() {
     var canvas = document.getElementById("canvas");
     canvas.addEventListener("mousedown", getPositionClick, false);
     canvas.addEventListener("mousemove", getPositionMove, false);
+	canvas.setAttribute("tabindex", 0);
+	canvas.addEventListener("keydown", getKeyDown, false);
 	loadAndDrawImage("images/endturn.png", 400, 550);
 	updateTurn();
 	for (var i = 0; i < teams.length; i++) {
@@ -196,6 +197,26 @@ function getPositionMove(event) {
 	context.fillText(x + ", " + y, 820, 120);*/
 }
 
+function getKeyDown(event) {
+	if (event.keyCode == 81) {
+		if (currChar != null) {
+			currChar.move(currChar.row, currChar.col);
+			currChar = null;
+			setTimeout(function() {
+				for (i = 0; i < teams.length; i++) {
+					for (j = 0; j < teams[i].length; j++) {
+						teams[i][j].drawCurrPos();
+					}
+				}
+				for (var i = 0; i < fruits.length; i++) {
+					fruits[i].drawCurrPos();
+				}
+				context.clearRect(0, 585, 350, 120);
+			}, 20);
+		}
+	}
+}
+
 function mouseOverPrint(row, col) {
 	mouseRow = row;
 	mouseCol = col;
@@ -335,6 +356,12 @@ function updateTurn() {
 			case 1:
 				teamColour = "Blue";
 				break;
+		}
+		for (var i = 0; i < teams.length; i++) {
+			for (var j = 0; j < teams[i].length; j++) {
+				context.clearRect(teams[i][j].col * 50 + 10, teams[i][j].row * 50 + 10, 30, 30);
+				teams[i][j].drawCurrPos();
+			}
 		}
 		context.fillText(teamColour + " to move", 500, 520);
 	}
