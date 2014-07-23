@@ -12,6 +12,7 @@ var mouseRow;
 var mouseCol;
 var turn;
 var inPlay;
+var printInterval = setInterval(function() {console.log("debug interval")}, 60000);
 function init() {
 	teams = new Array();
 	for (var i = 0; i < 2; i++) {
@@ -269,6 +270,7 @@ function getKeyDown(event) {
 }
 
 function mouseOverPrint(row, col) {
+	clearInterval(printInterval);
 	mouseRow = row;
 	mouseCol = col;
 	var i;
@@ -291,7 +293,7 @@ function mouseOverPrint(row, col) {
 	}
 	var canvas = document.getElementById("canvas");
 	var context = canvas.getContext("2d");
-	context.clearRect(0, 585, 350, 120);
+	context.clearRect(0, 585, 350, 200);
 	context.font = '12pt Calibri';
 	context.fillStyle = 'black';
 	if (currChar != null) {
@@ -305,12 +307,13 @@ function mouseOverPrint(row, col) {
 	if (mouseFruit != null) {
 		context.fillText("Fruit: " + mouseFruit.digestCost + " turns to digest", 0, 620);
 	}
-	for(i = 0; i < mouseChar.length; i++) {
+	for (i = 0; i < mouseChar.length; i++) {
 		context.font = '10pt Calibri';
-		loadAndDrawImage("images/char" + mouseChar[i].imagePath + ".png", i * 50, 620)
-		context.fillText("AP: " + mouseChar[i].currAP + "/" + (5 + mouseChar[i].level), i * 50, 665);
-		context.fillText("Lvl: " + mouseChar[i].level, i * 50, 680);
-		context.fillText("DgP: " + mouseChar[i].digestion, i * 50, 695);
+		loadAndDrawImage("images/char" + mouseChar[i].imagePath + ".png", 0 + Math.floor(i / 2) * 180, 620 + (i % 2) * 80)
+		context.fillText("Action Points: " + mouseChar[i].currAP + "/" + (5 + mouseChar[i].level), 40 + Math.floor(i / 2) * 180, 630 + (i % 2) * 80);
+		context.fillText("Current AP Regen: " + (4 + Math.ceil(mouseChar[i].level / 3) - mouseChar[i].digestion), 40 + Math.floor(i / 2) * 180, 645 + (i % 2) * 80);
+		context.fillText("Level: " + mouseChar[i].level, 40 + Math.floor(i / 2) * 180, 660 + (i % 2) * 80);
+		context.fillText("Digestion Penalty: " + mouseChar[i].digestion, 40 + Math.floor(i / 2) * 180, 675 + (i % 2) * 80);
 	}
 }
 
