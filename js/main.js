@@ -38,6 +38,8 @@ function init() {
     canvas.addEventListener("mousemove", getPositionMove, false);
 	canvas.setAttribute("tabindex", 0);
 	canvas.addEventListener("keydown", getKeyDown, false);
+	var context = canvas.getContext("2d");
+	context.clearRect(400, 550, 85, 30);
 	loadAndDrawImage("images/endturn.png", 400, 550);
 	updateTurn();
 	for (var i = 0; i < teams.length; i++) {
@@ -353,10 +355,14 @@ function updateStatus() {
 	if (eatenArray[0] >= 1) {
 		window.alert("Red wins!");
 		inPlay = false;
+		context.clearRect(400, 550, 85, 30);
+		loadAndDrawImage("images/restart.png", 400, 550);
 	}
 	else if (eatenArray[1] >= 1) {
 		window.alert("Blue wins!");
 		inPlay = false;
+		context.clearRect(400, 550, 85, 30);
+		loadAndDrawImage("images/restart.png", 400, 550);
 	}
 }
 
