@@ -258,6 +258,7 @@ function getKeyDown(event) {
 				currChar.move(currChar.row, currChar.col);
 				currChar = null;
 			}
+			updateTurn();
 			for (i = 0; i < teams.length; i++) {
 				for (j = 0; j < teams[i].length; j++) {
 					teams[i][j].drawCurrPos();
@@ -266,7 +267,6 @@ function getKeyDown(event) {
 			for (var i = 0; i < fruits.length; i++) {
 				fruits[i].drawCurrPos();
 			}
-			updateTurn();
 		}
 	}
 }
