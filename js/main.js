@@ -791,10 +791,10 @@ function Fruit(row, col, digestCost) {
 	this.imagePath = "images/cpoint-1.png";
 	
 	this.drawCurrPos = function() {
-		if (digestCost == 0) {
+		if (this.digestCost == 0) {
 			loadAndDrawImage("images/cpoint1.png", (this.col * 50) + 10, (this.row * 50) + 10);
 		}
-		else if (digestCost > 5) {
+		else if (this.digestCost > 5) {
 			loadAndDrawImage("images/cpoint0.png", (this.col * 50) + 10, (this.row * 50) + 10);
 		}
 		else {
