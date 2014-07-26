@@ -352,13 +352,13 @@ function updateStatus() {
 	context.fillText("Fruits Eaten: ", 400, 610);
 	context.fillText("Red:  " + eatenArray[0], 400, 625);
 	context.fillText("Blue: " + eatenArray[1], 400, 640);
-	if (eatenArray[0] >= 20) {
+	if (eatenArray[0] >= 10) {
 		window.alert("Red wins!");
 		inPlay = false;
 		context.clearRect(400, 550, 85, 30);
 		loadAndDrawImage("images/restart.png", 400, 550);
 	}
-	else if (eatenArray[1] >= 20) {
+	else if (eatenArray[1] >= 10) {
 		window.alert("Blue wins!");
 		inPlay = false;
 		context.clearRect(400, 550, 85, 30);
@@ -791,6 +791,14 @@ function Fruit(row, col, digestCost) {
 	this.imagePath = "images/cpoint-1.png";
 	
 	this.drawCurrPos = function() {
-		loadAndDrawImage(this.imagePath, (this.col * 50) + 10, (this.row * 50) + 10);
+		if (digestCost == 0) {
+			loadAndDrawImage("images/cpoint0.png", (this.col * 50) + 10, (this.row * 50) + 10);
+		}
+		else if (digestCost >= 5) {
+			loadAndDrawImage("images/cpoint1.png", (this.col * 50) + 10, (this.row * 50) + 10);
+		}
+		else {
+			loadAndDrawImage(this.imagePath, (this.col * 50) + 10, (this.row * 50) + 10);
+		}
 	}
 }
