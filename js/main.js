@@ -352,13 +352,13 @@ function updateStatus() {
 	context.fillText("Fruits Eaten: ", 400, 610);
 	context.fillText("Red:  " + eatenArray[0], 400, 625);
 	context.fillText("Blue: " + eatenArray[1], 400, 640);
-	if (eatenArray[0] >= 1) {
+	if (eatenArray[0] >= 20) {
 		window.alert("Red wins!");
 		inPlay = false;
 		context.clearRect(400, 550, 85, 30);
 		loadAndDrawImage("images/restart.png", 400, 550);
 	}
-	else if (eatenArray[1] >= 1) {
+	else if (eatenArray[1] >= 20) {
 		window.alert("Blue wins!");
 		inPlay = false;
 		context.clearRect(400, 550, 85, 30);

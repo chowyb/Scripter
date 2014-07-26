@@ -5,17 +5,18 @@
     <title>
 	Scripter
     </title>
+	<!-- Button trigger modal -->
+	<button class="btn btn-primary btn-lg" style="padding-left: 30; padding-right: 30; margin-left: auto; margin-right: auto; display: block;" data-toggle="modal" data-target="#myModal">
+		Rules
+	</button>
+	<br>
     <link href="css/bootstrap.min.css" rel="stylesheet">
 		<script type="text/javascript" src="js/jquery-2.1.1.min.js"></script>
 		<script type="text/javascript" src="js/bootstrap.min.js"></script>
         <script type="text/javascript" src="js/main.js"></script>
   </head>
   <body>
-	<canvas id = "canvas" width = "1000" height = "800"></canvas>
-	<!-- Button trigger modal -->
-	<button class="btn btn-primary btn-lg" data-toggle="modal" data-target="#myModal">
-		Rules
-	</button>
+	<canvas id = "canvas" style="padding-left: 0; padding-right: 0; margin-left: auto; margin-right: auto; display: block;" width = "770" height = "800"></canvas>
 
 	<!-- Modal -->
 	<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
@@ -27,7 +28,7 @@
 				</div>
 				<div class="modal-body">
 					<h4>Goal of the game</h4>
-					<p>The objective of the game is to eat a specific number of fruits before your opponent to win.</p>
+					<p>The objective of the game is to eat a specific number of fruits before your opponent to win (20 for the current version).</p>
 					<h4>Character stats</h4>
 					<p>Each character has 5 stats to take into consideration when planning your moves:</p>
 					<p>Maximum Action Points(AP): This determines the maximum amount of AP this character can have stored at any one time.
